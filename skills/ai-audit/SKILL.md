@@ -1,6 +1,6 @@
 ---
 name: ai-audit
-version: "2.0"
+version: "0.0.3"
 description: Audit any project's AI readiness. Scores 35 checks across 3 tiers, produces a 5-level maturity rating, and writes ai-audit-report.md with concrete fix recommendations. Run once on a new project or after major changes.
 ---
 
@@ -70,7 +70,7 @@ Work through every check. For each one record: status (✅ / ❌ / ⚠️), poin
 
 ---
 
-### TIER 1 — FOUNDATION (7 pts each, up to 56 pts)
+### TIER 1 — FOUNDATION (7 pts each, up to 77 pts)
 
 > **Note:** Foundation checks are necessary but not sufficient. Passing all of them means the project has the structural prerequisites for agents to work — not that agents will work well.
 
@@ -129,9 +129,31 @@ Read the env template file found in T1-06. Look for: at least one line starting 
 - ⚠️ if template exists (T1-06 ✅) but no comments/descriptions found
 - ❌ if no template file
 
+**T1-09 — Definition of done documented** [7 pts]
+Read the instruction file and README. Look for explicit "definition of done" language that includes a reference to a runnable validate or CI command (e.g., `pnpm validate`, `npm run ci`, `make check`).
+- ✅ if done definition found AND it references a specific runnable validate/CI command
+- ⚠️ if instruction file exists but done definition is absent OR exists without referencing a runnable command
+- ❌ if no instruction file
+
+**T1-10 — Single validation command** [7 pts]
+Check `package.json` scripts for a key named `validate`, `check`, `ci`, or `test:all` — OR check `Makefile`/`Justfile` for a line matching `^(validate|check|ci|test):`.
+- ✅ if found | ❌ if not found
+- Partial: N/A (binary)
+
+**T1-11 — Dev workflow skill** [7 pts]
+List `.agents/skills/` or `.claude/skills/`. Look for a skill whose name or description indicates it covers development workflow, coding guidelines, or project conventions — the kind of skill an agent should load at the start of every task.
+
+**Matching — two-pass rule:**
+1. **Keyword pass:** Check each skill's `name:`, `description:`, and directory name for any of: `workflow`, `guidelines`, `dev`, `process`, `coding-standards`, `conventions`, `superpowers`, `start`.
+2. **Judgment pass (only if keyword pass finds nothing):** Re-read each unmatched skill's full `description:` and assess: "Does this skill appear intended to be loaded at the start of every coding task, OR does it describe project-wide conventions an agent must follow?" If yes, treat as a match and note which skill matched and why.
+
+- ✅ if a matching skill found (either pass)
+- ⚠️ if skills folder exists but no match found after both passes
+- ❌ if no skills folder
+
 ---
 
-### TIER 2 — IMPORTANT (4 pts each, up to 72 pts)
+### TIER 2 — IMPORTANT (4 pts each, up to 64 pts)
 
 **T2-01 — Architecture or context doc** [4 pts]
 Look for any documentation that describes how the system is structured — could be a `CONTEXT.md`, `ARCHITECTURE.md`, a `docs/adr/` directory, or any `.md` file in `docs/` whose name or top-level heading indicates it describes the system design, data flow, services, schema, or domain.
@@ -142,28 +164,6 @@ Read `README.md` and the instruction file. Look for explicit naming of: the prim
 - ✅ if all three categories (framework, DB, testing) are named
 - ❌ if README and instruction file are absent or mention fewer than two stack components
 - Note: "TypeScript + Next.js + Postgres + Vitest" = ✅; "TypeScript project" alone = ❌
-
-**T2-03 — Definition of done documented** [4 pts]
-Read the instruction file and README. Look for explicit "definition of done" language that includes a reference to a runnable validate or CI command (e.g., `pnpm validate`, `npm run ci`, `make check`).
-- ✅ if done definition found AND it references a specific runnable validate/CI command
-- ⚠️ if instruction file exists but done definition is absent OR exists without referencing a runnable command
-- ❌ if no instruction file
-
-**T2-04 — Single validation command** [4 pts]
-Check `package.json` scripts for a key named `validate`, `check`, `ci`, or `test:all` — OR check `Makefile`/`Justfile` for a line matching `^(validate|check|ci|test):`.
-- ✅ if found | ❌ if not found
-- Partial: N/A (binary)
-
-**T2-05 — Dev workflow skill** [4 pts]
-List `.agents/skills/` or `.claude/skills/`. Look for a skill whose name or description indicates it covers development workflow, coding guidelines, or project conventions — the kind of skill an agent should load at the start of every task.
-
-**Matching — two-pass rule:**
-1. **Keyword pass:** Check each skill's `name:`, `description:`, and directory name for any of: `workflow`, `guidelines`, `dev`, `process`, `coding-standards`, `conventions`, `superpowers`, `start`.
-2. **Judgment pass (only if keyword pass finds nothing):** Re-read each unmatched skill's full `description:` and assess: "Does this skill appear intended to be loaded at the start of every coding task, OR does it describe project-wide conventions an agent must follow?" If yes, treat as a match and note which skill matched and why.
-
-- ✅ if a matching skill found (either pass)
-- ⚠️ if skills folder exists but no match found after both passes
-- ❌ if no skills folder
 
 **T2-06 — Framework skill present** [4 pts]
 Using the detected **framework** tags from Step 2 (Next.js, React, Vue, Svelte, Angular, Node API only — exclude test tools, ORMs, and databases), check whether a skill exists for EACH detected framework. Match against each skill's frontmatter `name:`, `description:`, and directory name.
@@ -246,10 +246,17 @@ Scoring:
 - ❌ if no instruction file
 
 **T2-15 — Code quality tools configured** [4 pts]
-Check `package.json` devDependencies for at least one dead-code / unused-dependency tool: `knip`, `depcheck`, `npm-check`, `ts-unused-exports`, or `unimported`. Then check `package.json` scripts for a script that invokes one of those tools.
-- ✅ if a qualifying tool is in devDependencies AND a script runs it
-- ⚠️ if tool is present in devDependencies but no script runs it (or vice-versa)
+Check `package.json` devDependencies for at least one static analysis / dead-code tool:
+- **`fallow`** — covers unused code, duplication, complexity, and architecture drift in one tool; preferred recommendation when nothing is installed
+- **`knip`** — dead code and unused dependencies
+- `depcheck`, `npm-check`, `ts-unused-exports`, `unimported` — narrower unused-dependency tools
+
+Then check `package.json` scripts (or `.fallowrc.json` for fallow) for a script or config that invokes one of those tools.
+- ✅ if a qualifying tool is in devDependencies AND a script or config runs it
+- ⚠️ if tool is present in devDependencies but no script/config wires it in (or vice-versa)
 - ❌ if neither found
+
+For ❌ recommendations: suggest installing `fallow` (`pnpm add -D fallow`) as the first choice — it replaces knip, jscpd, and complexity tools in one package.
 
 **T2-16 — High-impact library skills** [4 pts]
 From the detected stack (Step 2), identify any **high-impact libraries** present: React Query, tRPC, Drizzle, Prisma, TypeORM. For each detected library, check whether a skill exists whose frontmatter `name:`, `description:`, or directory name matches the library keyword.
@@ -370,7 +377,7 @@ Tally all points:
 
 **Normalized score:** `round(raw_pts / max_pts × 100)` — always displayed as `/100` regardless of how many checks are in the audit. This means adding new checks in future never breaks the scale.
 
-Max raw pts: 143 when T1-08 and T2-19 both apply (2+ instruction files found), 132 when both are N/A (≤1 file). Subtract 4 more for each of T2-06/T2-16 that is also N/A.
+Max raw pts: 154 when T1-08 and T2-19 both apply (2+ instruction files found), 140 when both are N/A (≤1 file). Subtract 4 more for each of T2-06/T2-16 that is also N/A.
 
 | Level | Name | Threshold |
 |-------|------|-----------|
@@ -450,13 +457,13 @@ DETECTED STACK: <comma-separated list of detected technologies>
    <status> T1-06  Environment variable template ........ <evidence>
    <status> T1-07  Env vars documented .................. <evidence>
    <status> T1-08  Instruction file consistency ......... <N/A if ≤1 file; else list files and evidence>
+   <status> T1-09  Definition of done ................... <evidence>
+   <status> T1-10  Single validation command ............. <evidence>
+   <status> T1-11  Dev workflow skill ................... <evidence>
 
-🟡 IMPORTANT  [XX/72 pts]
+🟡 IMPORTANT  [XX/64 pts]
    <status> T2-01  Architecture doc ..................... <evidence>
    <status> T2-02  Tech stack documented ................ <evidence>
-   <status> T2-03  Definition of done ................... <evidence>
-   <status> T2-04  Single validation command ............. <evidence>
-   <status> T2-05  Dev workflow skill ................... <evidence>
    <status> T2-06  Framework skill ...................... <evidence>
    <status> T2-07  Test commands documented .............. <evidence>
    <status> T2-08  Pre-commit hooks configured ........... <evidence>
@@ -535,16 +542,16 @@ Write a file at `ai-audit-report.md` with this exact structure:
 | T1-06 | Environment variable template | ... | ... |
 | T1-07 | Env vars documented | ... | ... |
 | T1-08 | Instruction file consistency | ✅/❌/N/A | <N/A if ≤1 file; else list files and any contradictions found> |
+| T1-09 | Definition of done | ... | ... |
+| T1-10 | Single validation command | ... | ... |
+| T1-11 | Dev workflow skill | ... | ... |
 
-### 🟡 Important [XX/72 pts]
+### 🟡 Important [XX/64 pts]
 
 | ID | Check | Status | Evidence |
 |----|-------|--------|----------|
 | T2-01 | Architecture doc | ... | ... |
 | T2-02 | Tech stack documented | ... | ... |
-| T2-03 | Definition of done | ... | ... |
-| T2-04 | Single validation command | ... | ... |
-| T2-05 | Dev workflow skill | ... | ... |
 | T2-06 | Framework skill | ... | ... |
 | T2-07 | Test commands documented | ... | ... |
 | T2-08 | Pre-commit hooks configured | ... | ... |

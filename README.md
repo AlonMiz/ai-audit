@@ -2,7 +2,7 @@
 
 An agent skill that audits any codebase's AI readiness in one command.
 
-Scores **34 checks** across 3 tiers, outputs a **5-level maturity rating** (score normalized to /100), and writes `ai-audit-report.md` with concrete fix recommendations.
+Scores **35 checks** across 3 tiers, outputs a **5-level maturity rating** (score normalized to /100), and writes `ai-audit-report.md` with concrete fix recommendations.
 
 ## Install
 
@@ -20,9 +20,9 @@ The agent reads your project files, runs all checks, prints a scored report to c
 
 ## What it checks
 
-### 🔴 Foundation — up to 8 checks × 7 pts = up to 56 pts
+### 🔴 Foundation — up to 11 checks × 7 pts = up to 77 pts
 
-The basics. Without these, an AI agent has no reliable orientation in your project.
+The basics. Without these, an AI agent has no reliable orientation — and no consistent way to know when it's done or how to work.
 
 | ID | Check |
 |----|-------|
@@ -34,8 +34,11 @@ The basics. Without these, an AI agent has no reliable orientation in your proje
 | T1-06 | Environment variable template (`.env.example`) |
 | T1-07 | Env vars are documented with comments |
 | T1-08 | Instruction files are consistent — no contradictions *(conditional: applies when 2+ instruction files exist)* |
+| T1-09 | Definition of done documented |
+| T1-10 | Single validation command (`validate`, `ci`, `check`) |
+| T1-11 | Dev workflow skill |
 
-### 🟡 Important — up to 18 checks × 4 pts = up to 72 pts
+### 🟡 Important — up to 16 checks × 4 pts = up to 64 pts
 
 Without these, the AI will make recurring mistakes on conventions and workflow.
 
@@ -43,9 +46,6 @@ Without these, the AI will make recurring mistakes on conventions and workflow.
 |----|-------|
 | T2-01 | Architecture or context doc |
 | T2-02 | Tech stack documented |
-| T2-03 | Definition of done documented |
-| T2-04 | Single validation command (`validate`, `ci`, `check`) |
-| T2-05 | Dev workflow skill |
 | T2-06 | Framework skill (auto-detected from `package.json`) *(conditional: N/A if no package.json)* |
 | T2-07 | Test commands documented (unit + E2E) |
 | T2-08 | Pre-commit hooks configured (lint + format + typecheck) |
@@ -60,6 +60,7 @@ Without these, the AI will make recurring mistakes on conventions and workflow.
 | T2-17 | Language discipline documented (TypeScript: no `any`, no `as`, strict mode) |
 | T2-18 | Schema validation configured (Zod, Valibot, etc.) |
 | T2-19 | No duplicate content across instruction files *(conditional: applies when 2+ instruction files exist)* |
+| T2-20 | Code collaboration protocol documented (commits, PRs, code review) |
 
 ### 🟢 Advanced — 11 checks × 1 pt = 11 pts
 
@@ -99,7 +100,7 @@ The skill is a single `SKILL.md` file. When invoked, your agent:
 
 1. Reads key project files (instruction files, README, package.json, skill folders, docs, config files) — never touches `src/`
 2. Detects the stack from `package.json`
-3. Runs all 34 checks in order, recording evidence for each
+3. Runs all 35 checks in order, recording evidence for each
 4. Scores and grades the result
 5. Generates ranked recommendations with copy-pasteable fixes
 6. Writes `ai-audit-report.md` and prints a summary to chat
