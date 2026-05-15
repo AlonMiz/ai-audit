@@ -42,7 +42,7 @@ Next.js, React, TypeScript, Drizzle ORM, Neon Postgres, Vitest, Playwright, Reac
 | T2-08 | Pre-commit hooks configured | ⚠️ | `lefthook.yml` covers Phase 1 (lint) and Phase 2 (format) via biome, but Phase 3 (typecheck or test) is absent |
 | T2-09 | E2E tests configured | ✅ | `playwright.config.ts` at root; 15+ `*.spec.ts` files in `tests/` |
 | T2-10 | TDD workflow (informational) | ℹ️ | Present — `test-driven-development` and `red-green-refactor` skills exist; AGENTS.md: "NEVER just change the test to match the current implementation" |
-| T2-11 | Operational guardrails documented | ✅ | 3 signals found: (1) prohibition language (NEVER git push, NEVER use as, NEVER use @ts-ignore), (2) shell one-liner ban ("Never inline bash loops in ad-hoc terminal calls"), (4) script discipline ("create a reusable script in scripts/") |
+| T2-11 | Operational guardrails documented | ✅ | 3 signals found: (1) prohibition language (NEVER git push, NEVER use as, NEVER use @ts-ignore), (2) shell one-liner ban ("Never inline bash loops in ad-hoc terminal calls"), (3) script discipline ("create a reusable script in scripts/") |
 | T2-12 | Planning protocol documented | ✅ | When: "Always create a plan before starting a complex task"; Where: "Store plans in `/plans/` directory"; How: `writing-plans` skill referenced |
 | T2-13 | Test strategy documented | ⚠️ | 4 test types named (Unit, E2E, Storybook, API) but no explicit when-to-use selection guidance — only procedural "how to run" info |
 | T2-14 | Branch finishing protocol documented | ⚠️ | Only 1 signal: "NEVER git push without explicit permission from the developer. Commit locally, then wait to be told to push." Missing: pre-merge summary, cleanup protocol |
@@ -51,7 +51,7 @@ Next.js, React, TypeScript, Drizzle ORM, Neon Postgres, Vitest, Playwright, Reac
 | T2-17 | Language discipline documented | ✅ | (1) no any: "NO 'any', 'as', or '@ts-ignore/expect-error'"; (2) no as: "NEVER USE 'as' WITHOUT EXPLICIT PERMISSION"; (3) strict: "Use TypeScript strict mode" |
 | T2-18 | Schema validation configured | ✅ | `zod` v4.2.1 in dependencies; AGENTS.md: "Use Zod schemas for all input validation", "Validate inputs with Zod schemas" |
 | T2-19 | No duplicate instruction content | N/A | Only 1 instruction file found (AGENTS.md) |
-| T2-20 | Code collaboration protocol documented | ✅ | 2 signals: (2) PR/integration via `finishing-a-development-branch` skill reference; (3) code review via `requesting-code-review` and `receiving-code-review` skill references |
+| T2-20 | Code collaboration protocol documented | ✅ | 2/3 signals: (1) commit conventions: absent; (2) PR/integration via `finishing-a-development-branch` skill reference; (3) code review via `requesting-code-review` and `receiving-code-review` skill references |
 
 ### 🟢 Advanced [7/11 pts]
 
