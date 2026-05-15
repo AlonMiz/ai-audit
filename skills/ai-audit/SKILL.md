@@ -1,7 +1,7 @@
 ---
 name: ai-audit
 version: "2.0"
-description: Audit any project's AI readiness. Scores 34 checks across 3 tiers, produces a 5-level maturity rating, and writes ai-audit-report.md with concrete fix recommendations. Run once on a new project or after major changes.
+description: Audit any project's AI readiness. Scores 35 checks across 3 tiers, produces a 5-level maturity rating, and writes ai-audit-report.md with concrete fix recommendations. Run once on a new project or after major changes.
 ---
 
 You are running an **AI Readiness Audit** on this codebase. Your job is to evaluate how well the project is set up for AI agents to work in it effectively.
@@ -59,7 +59,7 @@ If `package.json` is absent: mark stack as "unknown" and skip T2-06 and T2-16.
 
 ---
 
-## STEP 3 — RUN ALL 34 CHECKS
+## STEP 3 — RUN ALL 35 CHECKS
 
 Work through every check. For each one record: status (✅ / ❌ / ⚠️), points earned (✅ = full points, ⚠️ = 0, ❌ = 0), and a brief evidence note.
 
@@ -293,6 +293,17 @@ A block is "substantive" if it is 3 or more lines, or a named rule/command. A si
 
 Note: This check is about wasted context budget, not correctness. Duplication here does NOT imply contradiction (T1-08 handles that).
 
+**T2-20 — Code collaboration protocol documented** [4 pts]
+Read the instruction file. Look for at least 2 of these 3 concerns addressed:
+1. **Commit conventions** — commit message format, scope, or style (e.g. Conventional Commits, atomic commits, `feat:`/`fix:` prefixes, what makes a good commit)
+2. **PR/MR protocol** — what a pull/merge request should contain (description, checklist, title format, draft vs ready, linked issue)
+3. **Code review process** — how to give or receive review feedback, what must be addressed before merge, or a code review skill referenced
+
+Scoring:
+- ✅ 2 or more concerns addressed
+- ⚠️ 0–1 concerns addressed and instruction file exists — recommendation lists the missing concerns
+- ❌ if no instruction file
+
 ---
 
 ### TIER 3 — ADVANCED (1 pt each, 11 pts max)
@@ -359,7 +370,7 @@ Tally all points:
 
 **Normalized score:** `round(raw_pts / max_pts × 100)` — always displayed as `/100` regardless of how many checks are in the audit. This means adding new checks in future never breaks the scale.
 
-Max raw pts: 139 when T1-08 and T2-19 both apply (2+ instruction files found), 128 when both are N/A (≤1 file). Subtract 4 more for each of T2-06/T2-16 that is also N/A.
+Max raw pts: 143 when T1-08 and T2-19 both apply (2+ instruction files found), 132 when both are N/A (≤1 file). Subtract 4 more for each of T2-06/T2-16 that is also N/A.
 
 | Level | Name | Threshold |
 |-------|------|-----------|
@@ -460,6 +471,7 @@ DETECTED STACK: <comma-separated list of detected technologies>
    <status> T2-17  Language discipline ................... <evidence>
    <status> T2-18  Schema validation .................... <evidence>
    <status> T2-19  No duplicate instruction content ...... <N/A if ≤1 file; else list any duplicated categories>
+   <status> T2-20  Code collaboration protocol .......... <evidence>
 
 🟢 ADVANCED  [XX/11 pts]
    <status> T3-01  UI/Design skill ...................... <evidence>
@@ -547,6 +559,7 @@ Write a file at `ai-audit-report.md` with this exact structure:
 | T2-17 | Language discipline documented | ... | ... |
 | T2-18 | Schema validation configured | ... | ... |
 | T2-19 | No duplicate instruction content | ✅/⚠️/❌/N/A | <N/A if ≤1 file; else list duplicated categories and files> |
+| T2-20 | Code collaboration protocol documented | ... | ... |
 
 ### 🟢 Advanced [XX/11 pts]
 
