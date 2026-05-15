@@ -1,7 +1,6 @@
 ---
 name: ai-audit
-version: "0.0.3"
-description: Audit any project's AI readiness. Scores 35 checks across 3 tiers, produces a 5-level maturity rating, and writes ai-audit-report.md with concrete fix recommendations. Run once on a new project or after major changes.
+description: "Audit any project's AI readiness. Scores checks across 3 tiers, produces a 5-level maturity rating, and writes ai-audit-report.md with concrete fix recommendations. Run once on a new project or after major changes."
 ---
 
 You are running an **AI Readiness Audit** on this codebase. Your job is to evaluate how well the project is set up for AI agents to work in it effectively.
@@ -517,7 +516,7 @@ Write a file at `ai-audit-report.md` with this exact structure:
 
 **Project:** <folder name>
 **Date:** <today's date, YYYY-MM-DD format>
-**Audit Version:** 2.0
+**Audit Version:** 0.0.3
 **Score:** XX/100 (XX%) — Level X: Name
 
 ---
