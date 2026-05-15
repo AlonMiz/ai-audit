@@ -2,7 +2,7 @@
 
 **Project:** newz  
 **Date:** 2026-05-15  
-**Score:** 85/116 (73%) — Level 3: Standardized
+**Score:** 73/100 (73%) — Level 3: Standardized
 
 ---
 

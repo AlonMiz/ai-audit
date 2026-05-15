@@ -1,6 +1,6 @@
 ---
 name: ai-audit
-description: Audit any project's AI readiness. Scores 32 checks across 3 tiers (116 pts max), produces a 5-level maturity rating, and writes ai-audit-report.md with concrete fix recommendations. Run once on a new project or after major changes.
+description: Audit any project's AI readiness. Scores 32 checks across 3 tiers, produces a 5-level maturity rating, and writes ai-audit-report.md with concrete fix recommendations. Run once on a new project or after major changes.
 ---
 
 You are running an **AI Readiness Audit** on this codebase. Your job is to evaluate how well the project is set up for AI agents to work in it effectively.
@@ -201,8 +201,8 @@ Read the instruction file. Look for ALL THREE of:
 3. **How** — reference to a planning skill, spec approach, or TDD/design step
 
 Scoring:
-- ✅ all three present
-- ⚠️ if 1–2 of the three present — recommendation tells the agent which parts are missing and what to add
+- ✅ if 2 or more of the three signals present
+- ⚠️ if 1 signal present — recommendation tells the agent which parts are missing and what to add
 - ⚠️ if none present and instruction file exists — recommendation provides a default planning protocol to add
 - ❌ if no instruction file
 
@@ -288,7 +288,9 @@ Tally all points:
 - ⚠️ and ❌ = 0 pts
 - N/A checks do not affect the denominator
 
-Total possible: 116 (or 112 if T2-06 is N/A)
+**Normalized score:** `round(raw_pts / max_pts × 100)` — always displayed as `/100` regardless of how many checks are in the audit. This means adding new checks in future never breaks the scale.
+
+Max raw pts: 116 (or 112 if T2-06 is N/A)
 
 | Level | Name | Threshold |
 |-------|------|-----------|
@@ -351,7 +353,7 @@ description: <one sentence — this is what the AI searches to decide when to lo
 ╔════════════════════════════════════════════════════════════╗
 ║          AI READINESS AUDIT — <folder name>                ║
 ║                                                            ║
-   ║   Score: XX/116  (XX%)     Level X — Name                  ║
+   ║   Score: XX/100  (XX%)     Level X — Name                  ║
 ╚════════════════════════════════════════════════════════════╝
 
 DETECTED STACK: <comma-separated list of detected technologies>
@@ -421,7 +423,7 @@ Write a file at `ai-audit-report.md` with this exact structure:
 
 **Project:** <folder name>
 **Date:** <today's date>
-**Score:** XX/116 (XX%) — Level X: Name
+**Score:** XX/100 (XX%) — Level X: Name
 
 ---
 

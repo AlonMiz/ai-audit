@@ -2,7 +2,7 @@
 
 An agent skill that audits any codebase's AI readiness in one command.
 
-Scores **32 checks** across 3 tiers (116 pts max), outputs a **5-level maturity rating**, and writes `ai-audit-report.md` with concrete, copy-pasteable fix recommendations.
+Scores **32 checks** across 3 tiers, outputs a **5-level maturity rating** (score normalized to /100), and writes `ai-audit-report.md` with concrete fix recommendations.
 
 ## Install
 
