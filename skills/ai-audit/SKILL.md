@@ -98,7 +98,7 @@ Look for `README.md` at root.
 - Partial: N/A (binary)
 
 **T1-05 — README has quick start** [7 pts]
-Read `README.md`. Look for a prerequisites section AND install/run steps. Keywords: `install`, `pnpm`, `npm`, `yarn`, `pip`, `go run`, `cargo`, `Prerequisites`, `Quick Start`, `Getting Started`.
+Read `README.md`. Look for a section that tells a new developer how to get the project running locally — prerequisites (runtime versions, tools) AND install/run steps.
 - ✅ if both prerequisites and run steps are present
 - ❌ if README is absent or neither section is present
 - Note: README without a quick start is still a ❌ (not ⚠️) — the README is not a "present file with missing content" for this check
@@ -119,9 +119,8 @@ Read the env template file found in T1-06. Look for: at least one line starting 
 ### TIER 2 — IMPORTANT (4 pts each, 44 pts max)
 
 **T2-01 — Architecture or context doc** [4 pts]
-Look for: `CONTEXT.md`, `ARCHITECTURE.md`, `docs/architecture/`, `docs/adr/` — OR a `.md` file in `docs/` whose **filename** (case-insensitive, without extension) OR **first-level `#` heading** contains any of: `architecture`, `system`, `design`, `pipeline`, `schema`, `service`, `data flow`, `component`, `domain`.
+Look for any documentation that describes how the system is structured — could be a `CONTEXT.md`, `ARCHITECTURE.md`, a `docs/adr/` directory, or any `.md` file in `docs/` whose name or top-level heading indicates it describes the system design, data flow, services, schema, or domain.
 - ✅ if any match | ❌ if none found
-- Partial: N/A (binary)
 
 **T2-02 — Tech stack documented** [4 pts]
 Read `README.md` and the instruction file. Look for explicit naming of: the primary framework/language, database, and test tool.
@@ -141,7 +140,7 @@ Check `package.json` scripts for a key named `validate`, `check`, `ci`, or `test
 - Partial: N/A (binary)
 
 **T2-05 — Dev workflow skill** [4 pts]
-List `.agents/skills/` or `.claude/skills/`. For each skill, check its frontmatter `name:`, `description:`, and directory name for any of: `workflow`, `guidelines`, `dev`, `process`, `coding-standards`.
+List `.agents/skills/` or `.claude/skills/`. Look for a skill whose name or description indicates it covers development workflow, coding guidelines, or project conventions — the kind of skill an agent should load at the start of every task.
 - ✅ if a matching skill found
 - ⚠️ if skills folder exists but no matching skill found
 - ❌ if no skills folder
@@ -154,14 +153,14 @@ Using the expected skill keyword(s) from the detected stack (Step 2), check each
 - Skip (mark N/A, award 0) if `package.json` is absent
 
 **T2-07 — Test commands documented** [4 pts]
-Read the instruction file and README. Look for explicit commands for both: (1) unit tests (keywords: `unit`, `test:unit`, `vitest`, `jest`, `pytest`) AND (2) E2E tests (keywords: `e2e`, `playwright`, `cypress`, `test:e2e`).
+Read the instruction file and README. Look for explicit commands for both: (1) unit/integration tests AND (2) E2E/browser tests. The commands should be runnable as-is (e.g. `pnpm test:unit`, `pytest`, `make test`, `npx playwright test`).
 - ✅ if both unit and E2E commands documented | ❌ otherwise
 
 **T2-08 — Pre-commit hooks configured** [4 pts]
-Look for: `lefthook.yml`, `.lefthook.yml`, `.husky/`, `.pre-commit-config.yaml`. If found, read the config and check which phases are covered:
-- Phase 1 — Lint: keywords `lint`, `eslint`, `biome`, `rubocop`, `flake8`, `clippy`
-- Phase 2 — Format: keywords `format`, `prettier`, `biome`, `black`, `gofmt`, `rustfmt`
-- Phase 3 — Test/typecheck: keywords `test`, `typecheck`, `tsc`, `mypy`, `check-types`
+Look for a pre-commit hook config (`lefthook.yml`, `.lefthook.yml`, `.husky/`, `.pre-commit-config.yaml`). If found, read it and assess which quality phases are covered:
+- Phase 1 — Lint: checks code style/quality violations
+- Phase 2 — Format: enforces consistent code formatting
+- Phase 3 — Typecheck or test: catches type errors or runs a fast test suite
 
 Scoring:
 - ✅ all three phases covered
@@ -174,19 +173,19 @@ Look for: `playwright.config.ts`, `playwright.config.js`, `cypress.config.ts`, `
 - Partial: N/A (binary)
 
 **T2-10 — TDD workflow documented** [4 pts]
-Read the instruction file, README, and skill files' frontmatter. Look for: `red-green-refactor`, `TDD`, `test-first`, `test-driven`, `failing test first`, `write the test before`.
+Read the instruction file, README, and skill files' frontmatter. Look for language describing a test-first development process — writing a failing test before writing implementation code, the red-green-refactor loop, or equivalent.
 - ✅ if TDD process described
 - ⚠️ if instruction file exists but no TDD language found
 - ❌ if no instruction file
 
 **T2-11 — Operational guardrails documented** [4 pts]
-Read the instruction file. Look for evidence that agent operational safety has been addressed. Check for at least 3 of these 6 signals:
-1. **Prohibition language** — `NEVER`, `do not`, `never use` applied to terminal commands or tools
-2. **Shell one-liner ban** — explicit mention of `sed`, `awk`, `one-liner`, `shell script`, `grep -A`, `node -e`, `python3 -c`, or equivalent
-3. **No terminal file editing** — rule against editing files via terminal; must use file-editing tools instead
-4. **Script discipline** — instruction to use `package.json` scripts / named scripts rather than raw commands
-5. **Install gate** — must ask or confirm before running `pnpm add`, `npm install`, or equivalent
-6. **Temp file safety** — explicit instruction on where temp files go (e.g. `./tmp/`, not `/tmp/`)
+Read the instruction file. Look for evidence that agent operational safety has been addressed. Check for at least 3 of these 6 concerns:
+1. **Prohibition language** — explicit `NEVER` / `do not` rules applied to terminal commands or tool usage
+2. **Shell one-liner ban** — prohibition of ad-hoc shell scripts or complex one-liners (sed, awk, piping, inline node/python, etc.)
+3. **No terminal file editing** — rule that files must be edited with file-editing tools, not via terminal commands
+4. **Script discipline** — instruction to wrap operations in named package.json scripts rather than running raw commands
+5. **Install gate** — requirement to ask or confirm before installing packages
+6. **Temp file safety** — instruction on where to write temporary files (inside the workspace, not system paths)
 
 Scoring:
 - ✅ if 3 or more signals found
@@ -208,8 +207,8 @@ Scoring:
 
 **T2-13 — Test strategy documented** [4 pts]
 Read the instruction file and README. Look for:
-1. **Multiple test types named** — at least 2 of: `unit`, `integration`, `storybook`, `testing-library`, `e2e`, `playwright`, `cypress`, `vitest`, `jest`
-2. **Selection guidance** — language indicating when to use which: `depending on`, `choose`, `appropriate`, `scope`, `consider`, `for components`, `for user flows`, `for logic`
+1. **Multiple test types named** — at least 2 distinct test types mentioned (e.g. unit, integration, component, Storybook, E2E, browser tests)
+2. **Selection guidance** — any language that helps an agent decide which test type to use for a given task. This includes explicit rules like "unit for logic, E2E for user flows", comparative guidance, scope-based guidance, or a description of what each test type is for.
 
 Scoring:
 - ✅ both present — test types listed AND guidance on when to use which
@@ -218,10 +217,10 @@ Scoring:
 - ❌ if no instruction file
 
 **T2-14 — Branch finishing protocol documented** [4 pts]
-Read the instruction file. Look for at least 2 of these 3 signals:
-1. **Merge/integration strategy** — keywords: `merge`, `pull request`, `PR`, `squash`, `rebase`, `main`, `branch`
-2. **Pre-merge summary** — keywords: `summary`, `write a summary`, `describe what was implemented`, `before merging`
-3. **Cleanup** — keywords: `worktree`, `branch deletion`, `clean up`, `remove the branch`, `git worktree remove`
+Read the instruction file. Look for at least 2 of these 3 concerns addressed:
+1. **Merge/integration strategy** — how completed work gets integrated (merge to main, open a PR, squash, etc.)
+2. **Pre-merge summary** — requirement to write a summary of what was done before merging
+3. **Cleanup** — what to do after merging (remove worktree, delete branch, etc.)
 
 Scoring:
 - ✅ 2 or more signals found
@@ -233,19 +232,19 @@ Scoring:
 ### TIER 3 — ADVANCED (1 pt each, 11 pts max)
 
 **T3-01 — UI/Design skill** [1 pt]
-Look for a skill matching any of: `ui`, `ux`, `design`, `component`, `shadcn`, `style`, `theme`.
+Look for a skill whose name or description indicates it covers UI, UX, design systems, component libraries, or styling.
 - ✅ if found | ❌ if not found
 
 **T3-02 — Brainstorming/planning skill** [1 pt]
-Look for a skill matching any of: `brainstorm`, `ideation`, `planning`, `spec`, `design-thinking`, `exploration`, `writing-plans`.
+Look for a skill whose name or description indicates it covers brainstorming, ideation, writing specs, or planning tasks before implementation.
 - ✅ if found | ❌ if not found
 
 **T3-03 — Debugging skill** [1 pt]
-Look for a skill matching any of: `debug`, `diagnose`, `diagnosis`, `troubleshoot`, `systematic`.
+Look for a skill whose name or description indicates it covers debugging, diagnosing bugs, or systematic troubleshooting.
 - ✅ if found | ❌ if not found
 
 **T3-04 — Database/ORM skill** [1 pt]
-Look for a skill matching any of: `database`, `db`, `orm`, `sql`, `drizzle`, `prisma`, `postgres`, `neon`, `typeorm`, `mongo` — OR the expected DB keyword from the detected stack.
+Look for a skill whose name or description indicates it covers database access, ORM usage, migrations, or query patterns — or matches the detected DB stack.
 - ✅ if found | ❌ if not found
 
 **T3-05 — ADRs present** [1 pt]
@@ -253,28 +252,27 @@ Look for `docs/adr/` OR `docs/decisions/` containing at least one `.md` file.
 - ✅ if found | ❌ if not found
 
 **T3-06 — Domain/pipeline docs** [1 pt]
-Look for a `.md` file in `docs/` or `src/` (any subdirectory) whose filename (uppercase, without extension) is NOT in this exclusion set: `{README, CHANGELOG, CONTRIBUTING, LICENSE, SECURITY, CODE_OF_CONDUCT, DEPLOYMENT, TESTING, SETUP, INSTALL, MISC, NOTES, OVERVIEW, TODO, TODOS}`. Any file not on the list counts as domain-specific.
+Look for any `.md` file in `docs/` or `src/` subdirectories that documents domain knowledge, business logic, or a system pipeline — not generic project scaffolding (README, CHANGELOG, CONTRIBUTING, LICENSE, etc.).
 - ✅ if at least one domain-specific doc found | ❌ if none
 
 **T3-07 — Subagents defined** [1 pt]
-Look for `.claude/agents/` containing at least one `.md` file whose frontmatter includes `tools:` or `model:` — OR `.agents/agents/` with the same criteria. A skills folder (`.agents/skills/`) does NOT count; skills and subagents are distinct. Subagents have their own tool restrictions or model config.
-- ✅ if at least one file with `tools:` or `model:` frontmatter found in an agents directory
-- ❌ if no such file found, or only a skills folder exists
+Look for `.claude/agents/` or `.agents/agents/` containing at least one `.md` file with `tools:` or `model:` in its frontmatter. A skills folder does NOT count — subagents have their own tool restrictions or model config, skills do not.
+- ✅ if at least one qualifying file found | ❌ otherwise
 
 **T3-08 — Context scoped by path** [1 pt]
-Look for: any `.instructions.md`, `.rules.md`, or `AGENTS.md` in a subdirectory (not root) — OR any `.prompt.md` file whose frontmatter `applyTo:` is set to a specific path pattern other than `"**"`.
+Look for any instruction or rules file scoped to a subdirectory (not root) — e.g. an `AGENTS.md`, `.instructions.md`, or `.rules.md` inside a subfolder, or a `.prompt.md` with an `applyTo:` pattern targeting a specific path rather than `"**"`.
 - ✅ if found | ❌ if not found
 
-**T3-09 — Finishing/integration workflow** [1 pt]
-Look for a skill matching any of: `finishing`, `merge`, `pr`, `pull-request`, `git-workflow`, `branch`, `integration`.
+**T3-09 — Finishing/integration workflow skill** [1 pt]
+Look for a skill whose name or description indicates it covers finishing a development branch, creating PRs, merging, or integration workflow.
 - ✅ if found | ❌ if not found
 
 **T3-10 — MCP server configured** [1 pt]
-Look for `.vscode/mcp.json` at root (or inside any `.vscode/` folder).
+Look for an MCP server config file (e.g. `.vscode/mcp.json`, `mcp.json`, or similar).
 - ✅ if found | ❌ if not found
 
 **T3-11 — Eval/drift config** [1 pt]
-Look for any of: `*.eval.json`, `agentrc.eval.json`, an `evals/` directory, or an `eval/` directory containing at least one file. This signals the repo can measure whether instructions still help as code evolves.
+Look for any eval dataset or drift monitoring setup — an `evals/` or `eval/` directory with files, or eval config files. This signals the repo can measure whether instructions stay effective as code evolves.
 - ✅ if found | ❌ if not found
 
 ---
