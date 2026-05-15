@@ -2,7 +2,7 @@
 
 An agent skill that audits any codebase's AI readiness in one command.
 
-Scores **28 checks** across 3 tiers (52 pts max), outputs a **5-level maturity rating**, and writes `ai-audit-report.md` with concrete, copy-pasteable fix recommendations.
+Scores **28 checks** across 3 tiers (100 pts max), outputs a **5-level maturity rating**, and writes `ai-audit-report.md` with concrete, copy-pasteable fix recommendations.
 
 ## Install
 
@@ -20,7 +20,7 @@ The agent reads your project files, runs all checks, prints a scored report to c
 
 ## What it checks
 
-### 🔴 Critical — 7 checks × 3 pts = 21 pts
+### 🔴 Critical — 7 checks × 7 pts = 49 pts
 
 The basics. Without these, an AI agent has no reliable orientation in your project.
 
@@ -34,7 +34,7 @@ The basics. Without these, an AI agent has no reliable orientation in your proje
 | T1-06 | Environment variable template (`.env.example`) |
 | T1-07 | Env vars are documented with comments |
 
-### 🟡 Important — 10 checks × 2 pts = 20 pts
+### 🟡 Important — 10 checks × 4 pts = 40 pts
 
 Without these, the AI will make recurring mistakes on conventions and workflow.
 

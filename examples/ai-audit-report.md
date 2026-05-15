@@ -2,7 +2,7 @@
 
 **Project:** newz  
 **Date:** 2026-05-14  
-**Score:** 37/50 (74%) — Grade: C
+**Score:** 77/100 (77%) — Level 4: Optimized
 
 ---
 
@@ -14,7 +14,7 @@ Next.js 16, React 19, Drizzle ORM, Neon PostgreSQL, Vitest, Playwright
 
 ## Results
 
-### 🔴 Critical [21/21 pts]
+### 🔴 Critical [49/49 pts]
 
 | ID | Check | Status | Evidence |
 |----|-------|--------|----------|
@@ -26,7 +26,7 @@ Next.js 16, React 19, Drizzle ORM, Neon PostgreSQL, Vitest, Playwright
 | T1-06 | Environment variable template | ✅ | `.env.example` found at root |
 | T1-07 | Env vars documented | ✅ | `.env.example` has `#` comment blocks for every variable group |
 
-### 🟡 Important [12/20 pts]
+### 🟡 Important [24/40 pts]
 
 | ID | Check | Status | Evidence |
 |----|-------|--------|----------|
@@ -41,7 +41,7 @@ Next.js 16, React 19, Drizzle ORM, Neon PostgreSQL, Vitest, Playwright
 | T2-09 | E2E tests configured | ✅ | `e2e/playwright.config.ts` + 7 spec files (feed, cluster, dismiss, search, settings, sidebar, smoke) |
 | T2-10 | TDD workflow documented | ⚠️ | AGENTS.md and README contain no TDD/red-green-refactor language; only `task.prompt.md` (a prompt file, not instruction file) mentions it |
 
-### 🟢 Advanced [4/9 pts]
+### 🟢 Advanced [4/11 pts]
 
 | ID | Check | Status | Evidence |
 |----|-------|--------|----------|
@@ -54,12 +54,14 @@ Next.js 16, React 19, Drizzle ORM, Neon PostgreSQL, Vitest, Playwright
 | T3-07 | Subagents defined | ✅ | `.agents/` directory exists with `skills/` containing 3 skill definitions |
 | T3-08 | Context scoped by path | ❌ | No AGENTS.md in subdirectory; all `.prompt.md` files either have `applyTo: "**"` or no `applyTo`; no `.instructions.md` or `.rules.md` in any subdirectory |
 | T3-09 | Finishing/integration workflow | ❌ | No skill in project's `.agents/skills/` matching `finishing`, `merge`, `pr`, `pull-request`, `git-workflow`, `branch` (global skill referenced in AGENTS.md, but not installed locally) |
+| T3-10 | MCP server configured | ❌ | No `.mcp.json` or MCP server block found in config files |
+| T3-11 | Eval/drift config | ❌ | No eval dataset or drift monitoring config found |
 
 ---
 
 ## Recommendations
 
-### [+2 pts] T2-05 — Dev workflow skill
+### [+4 pts] T2-05 — Dev workflow skill
 
 Add a `dev-guidelines` skill to `.agents/skills/`. The AGENTS.md already references this skill by name but it's not installed in the project.
 
@@ -79,7 +81,7 @@ description: Development workflow guidelines for this project — shadcn/ui-firs
 See AGENTS.md for the full set of project conventions.
 ```
 
-### [+2 pts] T2-06 — Framework skill
+### [+4 pts] T2-06 — Framework skill
 
 Add a `nextjs-patterns` skill covering Next.js App Router, tRPC, and server/client component patterns.
 
@@ -98,7 +100,7 @@ description: Next.js App Router patterns for this project — server vs client c
 ...
 ```
 
-### [+2 pts] T2-08 — Pre-commit hooks: add typecheck phase
+### [+4 pts] T2-08 — Pre-commit hooks: add typecheck phase
 
 `lefthook.yml` covers lint and format but no typecheck. Add a typecheck command:
 
@@ -111,7 +113,7 @@ pre-commit:
       run: pnpm typecheck
 ```
 
-### [+2 pts] T2-10 — TDD workflow documented
+### [+4 pts] T2-10 — TDD workflow documented
 
 Add a TDD section to `AGENTS.md` or `README.md`. Example addition to AGENTS.md:
 
