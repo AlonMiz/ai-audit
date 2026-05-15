@@ -359,7 +359,7 @@ Tally all points:
 
 **Normalized score:** `round(raw_pts / max_pts × 100)` — always displayed as `/100` regardless of how many checks are in the audit. This means adding new checks in future never breaks the scale.
 
-Max raw pts: 143 when T1-08 and T2-19 both apply (2+ instruction files found), 135 when both are N/A (≤1 file). Subtract 4 more for each of T2-06/T2-16 that is also N/A.
+Max raw pts: 139 when T1-08 and T2-19 both apply (2+ instruction files found), 128 when both are N/A (≤1 file). Subtract 4 more for each of T2-06/T2-16 that is also N/A.
 
 | Level | Name | Threshold |
 |-------|------|-----------|
