@@ -1,6 +1,6 @@
 ---
 name: ai-audit
-description: Audit any project's AI readiness. Scores 28 checks across 3 tiers (52 pts max), produces a 5-level maturity rating, and writes ai-audit-report.md with concrete fix recommendations. Run once on a new project or after major changes.
+description: Audit any project's AI readiness. Scores 28 checks across 3 tiers (100 pts max), produces a 5-level maturity rating, and writes ai-audit-report.md with concrete fix recommendations. Run once on a new project or after major changes.
 ---
 
 You are running an **AI Readiness Audit** on this codebase. Your job is to evaluate how well the project is set up for AI agents to work in it effectively.
@@ -67,9 +67,9 @@ Work through every check. For each one record: status (✅ / ❌ / ⚠️), poin
 
 ---
 
-### TIER 1 — CRITICAL (3 pts each, 21 pts max)
+### TIER 1 — CRITICAL (7 pts each, 49 pts max)
 
-**T1-01 — Agent instruction file exists** [3 pts]
+**T1-01 — Agent instruction file exists** [7 pts]
 Look for any of: `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `.github/copilot-instructions.md`, `.instructions.md` at the root.
 - ✅ if any found | ❌ if none found
 - Partial: N/A (binary)
@@ -80,35 +80,35 @@ If T1-01 found **2 or more** instruction files, read all of them and check for c
 - If divergence detected: add a ⚠️ NOTE in the report under a "Flags" section
 - If consistent (or only 1 file): note "No divergence detected"
 
-**T1-02 — Instruction file has run commands** [3 pts]
+**T1-02 — Instruction file has run commands** [7 pts]
 Read the instruction file found in T1-01. Look for test, build, lint, validate, or dev commands (e.g., `pnpm test`, `npm run build`, `pytest`, `make test`).
 - ✅ if at least one command is present
 - ⚠️ if instruction file exists (T1-01 ✅) but no commands found
 - ❌ if no instruction file exists
 
-**T1-03 — Instruction file has coding conventions** [3 pts]
+**T1-03 — Instruction file has coding conventions** [7 pts]
 Read the instruction file. Look for at least one rule about code style, naming, tooling preference, or prohibited patterns (e.g., "use camelCase", "never use var", "prefer named exports").
 - ✅ if at least one convention rule found
 - ⚠️ if instruction file exists but no convention rules found
 - ❌ if no instruction file
 
-**T1-04 — README exists** [3 pts]
+**T1-04 — README exists** [7 pts]
 Look for `README.md` at root.
 - ✅ if found | ❌ if absent
 - Partial: N/A (binary)
 
-**T1-05 — README has quick start** [3 pts]
+**T1-05 — README has quick start** [7 pts]
 Read `README.md`. Look for a prerequisites section AND install/run steps. Keywords: `install`, `pnpm`, `npm`, `yarn`, `pip`, `go run`, `cargo`, `Prerequisites`, `Quick Start`, `Getting Started`.
 - ✅ if both prerequisites and run steps are present
 - ❌ if README is absent or neither section is present
 - Note: README without a quick start is still a ❌ (not ⚠️) — the README is not a "present file with missing content" for this check
 
-**T1-06 — Environment variable template** [3 pts]
+**T1-06 — Environment variable template** [7 pts]
 Look for any of: `.env.example`, `.env.template`, `.env.sample`, `.env.dist` at root.
 - ✅ if any found | ❌ if none found
 - Partial: N/A (binary)
 
-**T1-07 — Env vars are documented** [3 pts]
+**T1-07 — Env vars are documented** [7 pts]
 Read the env template file found in T1-06. Look for: at least one line starting with `#` that describes a variable's purpose, OR a README-style description block above variables.
 - ✅ if documentation comments present
 - ⚠️ if template exists (T1-06 ✅) but no comments/descriptions found
@@ -116,48 +116,48 @@ Read the env template file found in T1-06. Look for: at least one line starting 
 
 ---
 
-### TIER 2 — IMPORTANT (2 pts each, 20 pts max)
+### TIER 2 — IMPORTANT (4 pts each, 40 pts max)
 
-**T2-01 — Architecture or context doc** [2 pts]
+**T2-01 — Architecture or context doc** [4 pts]
 Look for: `CONTEXT.md`, `ARCHITECTURE.md`, `docs/architecture/`, `docs/adr/` — OR a `.md` file in `docs/` whose **filename** (case-insensitive, without extension) OR **first-level `#` heading** contains any of: `architecture`, `system`, `design`, `pipeline`, `schema`, `service`, `data flow`, `component`, `domain`.
 - ✅ if any match | ❌ if none found
 - Partial: N/A (binary)
 
-**T2-02 — Tech stack documented** [2 pts]
+**T2-02 — Tech stack documented** [4 pts]
 Read `README.md` and the instruction file. Look for explicit naming of: the primary framework/language, database, and test tool.
 - ✅ if all three categories (framework, DB, testing) are named
 - ❌ if README and instruction file are absent or mention fewer than two stack components
 - Note: "TypeScript + Next.js + Postgres + Vitest" = ✅; "TypeScript project" alone = ❌
 
-**T2-03 — Definition of done documented** [2 pts]
+**T2-03 — Definition of done documented** [4 pts]
 Read the instruction file and README. Look for explicit "definition of done" language, OR a description of what "done" means (e.g., "a task is complete when all tests pass", "pnpm validate must pass").
 - ✅ if clear definition found
 - ⚠️ if instruction file exists but no done-definition language found
 - ❌ if no instruction file
 
-**T2-04 — Single validation command** [2 pts]
+**T2-04 — Single validation command** [4 pts]
 Check `package.json` scripts for a key named `validate`, `check`, `ci`, or `test:all` — OR check `Makefile`/`Justfile` for a line matching `^(validate|check|ci|test):`.
 - ✅ if found | ❌ if not found
 - Partial: N/A (binary)
 
-**T2-05 — Dev workflow skill** [2 pts]
+**T2-05 — Dev workflow skill** [4 pts]
 List `.agents/skills/` or `.claude/skills/`. For each skill, check its frontmatter `name:`, `description:`, and directory name for any of: `workflow`, `guidelines`, `dev`, `process`, `coding-standards`.
 - ✅ if a matching skill found
 - ⚠️ if skills folder exists but no matching skill found
 - ❌ if no skills folder
 
-**T2-06 — Framework skill present** [2 pts]
+**T2-06 — Framework skill present** [4 pts]
 Using the expected skill keyword(s) from the detected stack (Step 2), check each skill's frontmatter `name:`, `description:`, and directory name for a match.
 - ✅ if a matching skill found
 - ⚠️ if skills folder exists but no framework skill matches
 - ❌ if no skills folder or stack is unknown
 - Skip (mark N/A, award 0) if `package.json` is absent
 
-**T2-07 — Test commands documented** [2 pts]
+**T2-07 — Test commands documented** [4 pts]
 Read the instruction file and README. Look for explicit commands for both: (1) unit tests (keywords: `unit`, `test:unit`, `vitest`, `jest`, `pytest`) AND (2) E2E tests (keywords: `e2e`, `playwright`, `cypress`, `test:e2e`).
 - ✅ if both unit and E2E commands documented | ❌ otherwise
 
-**T2-08 — Pre-commit hooks configured** [2 pts]
+**T2-08 — Pre-commit hooks configured** [4 pts]
 Look for: `lefthook.yml`, `.lefthook.yml`, `.husky/`, `.pre-commit-config.yaml`. If found, read the config and check which phases are covered:
 - Phase 1 — Lint: keywords `lint`, `eslint`, `biome`, `rubocop`, `flake8`, `clippy`
 - Phase 2 — Format: keywords `format`, `prettier`, `biome`, `black`, `gofmt`, `rustfmt`
@@ -168,12 +168,12 @@ Scoring:
 - ⚠️ config exists, 1–2 phases covered
 - ❌ config absent OR config exists but covers none of the three phases
 
-**T2-09 — E2E tests configured** [2 pts]
+**T2-09 — E2E tests configured** [4 pts]
 Look for: `playwright.config.ts`, `playwright.config.js`, `cypress.config.ts`, `cypress.config.js`, `nightwatch.conf.js`, `wdio.conf.js`. If found, also verify at least one `*.spec.*` or `*.e2e.*` file exists in `e2e/` or `tests/`.
 - ✅ if config AND at least one spec file found | ❌ otherwise
 - Partial: N/A (binary)
 
-**T2-10 — TDD workflow documented** [2 pts]
+**T2-10 — TDD workflow documented** [4 pts]
 Read the instruction file, README, and skill files' frontmatter. Look for: `red-green-refactor`, `TDD`, `test-first`, `test-driven`, `failing test first`, `write the test before`.
 - ✅ if TDD process described
 - ⚠️ if instruction file exists but no TDD language found
@@ -182,8 +182,6 @@ Read the instruction file, README, and skill files' frontmatter. Look for: `red-
 ---
 
 ### TIER 3 — ADVANCED (1 pt each, 11 pts max)
-
-For all T3 skill checks: check each skill's frontmatter `name:`, `description:`, and directory name. These checks are **binary** (✅ or ❌ only — no ⚠️).
 
 **T3-01 — UI/Design skill** [1 pt]
 Look for a skill matching any of: `ui`, `ux`, `design`, `component`, `shadcn`, `style`, `theme`.
@@ -235,13 +233,13 @@ Look for any of: `*.eval.json`, `agentrc.eval.json`, an `evals/` directory, or a
 ## STEP 4 — SCORE AND GRADE
 
 Tally all points:
-- Each ✅ in Tier 1 = 3 pts
-- Each ✅ in Tier 2 = 2 pts
+- Each ✅ in Tier 1 = 7 pts
+- Each ✅ in Tier 2 = 4 pts
 - Each ✅ in Tier 3 = 1 pt
 - ⚠️ and ❌ = 0 pts
 - N/A checks do not affect the denominator
 
-Total possible: 52 (or 50 if T2-06 is N/A)
+Total possible: 100 (or 96 if T2-06 is N/A)
 
 | Level | Name | Threshold |
 |-------|------|-----------|
@@ -302,12 +300,12 @@ description: <one sentence — this is what the AI searches to decide when to lo
 ╔════════════════════════════════════════════════════════════╗
 ║          AI READINESS AUDIT — <folder name>                ║
 ║                                                            ║
-║   Score: XX/52  (XX%)      Level X — Name                  ║
+║   Score: XX/100  (XX%)     Level X — Name                  ║
 ╚════════════════════════════════════════════════════════════╝
 
 DETECTED STACK: <comma-separated list of detected technologies>
 
-🔴 CRITICAL  [XX/21 pts]
+🔴 CRITICAL  [XX/49 pts]
    <status> T1-01  Agent instruction file ............. <evidence>
    <status> T1-02  Instruction file has commands ....... <evidence>
    <status> T1-03  Instruction file has conventions .... <evidence>
@@ -319,7 +317,7 @@ DETECTED STACK: <comma-separated list of detected technologies>
 🔍 FLAGS (non-scoring)
    ℹ️  DIV    Instruction divergence .............. <list files found; "divergent" or "consistent">
 
-🟡 IMPORTANT  [XX/20 pts]
+🟡 IMPORTANT  [XX/40 pts]
    <status> T2-01  Architecture doc ..................... <evidence>
    <status> T2-02  Tech stack documented ................ <evidence>
    <status> T2-03  Definition of done ................... <evidence>
@@ -368,7 +366,7 @@ Write a file at `ai-audit-report.md` with this exact structure:
 
 **Project:** <folder name>
 **Date:** <today's date>
-**Score:** XX/52 (XX%) — Level X: Name
+**Score:** XX/100 (XX%) — Level X: Name
 
 ---
 
@@ -380,7 +378,7 @@ Write a file at `ai-audit-report.md` with this exact structure:
 
 ## Results
 
-### 🔴 Critical [XX/21 pts]
+### 🔴 Critical [XX/49 pts]
 
 | ID | Check | Status | Evidence |
 |----|-------|--------|----------|
@@ -392,7 +390,7 @@ Write a file at `ai-audit-report.md` with this exact structure:
 | T1-06 | Environment variable template | ... | ... |
 | T1-07 | Env vars documented | ... | ... |
 
-### 🟡 Important [XX/20 pts]
+### 🟡 Important [XX/40 pts]
 
 | ID | Check | Status | Evidence |
 |----|-------|--------|----------|
