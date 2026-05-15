@@ -1,6 +1,7 @@
 ---
 name: ai-audit
-description: Audit any project's AI readiness. Scores 32 checks across 3 tiers, produces a 5-level maturity rating, and writes ai-audit-report.md with concrete fix recommendations. Run once on a new project or after major changes.
+version: "2.0"
+description: Audit any project's AI readiness. Scores 34 checks across 3 tiers, produces a 5-level maturity rating, and writes ai-audit-report.md with concrete fix recommendations. Run once on a new project or after major changes.
 ---
 
 You are running an **AI Readiness Audit** on this codebase. Your job is to evaluate how well the project is set up for AI agents to work in it effectively.
@@ -49,14 +50,16 @@ Parse `package.json` `dependencies` and `devDependencies`. Match against this ta
 | `jest` | Jest | `jest`, `test` |
 | `@playwright/test` or `playwright` | Playwright | `playwright`, `e2e` |
 | `cypress` | Cypress | `cypress`, `e2e` |
+| `@tanstack/react-query`, `react-query` | React Query | `react-query`, `tanstack`, `query` |
+| `@trpc/server`, `@trpc/client` | tRPC | `trpc` |
 
-If `package.json` is absent: mark stack as "unknown" and skip T2-06.
+If `package.json` is absent: mark stack as "unknown" and skip T2-06 and T2-16.
 
 **Keyword matching rule for all skill-based checks:** Match keywords against (1) the skill's YAML frontmatter `description:` field, (2) the `name:` field, or (3) the skill filename/directory name. Full-text content search is NOT required. You must open each skill file to read frontmatter — filename alone is not sufficient.
 
 ---
 
-## STEP 3 — RUN ALL 32 CHECKS
+## STEP 3 — RUN ALL 34 CHECKS
 
 Work through every check. For each one record: status (✅ / ❌ / ⚠️), points earned (✅ = full points, ⚠️ = 0, ❌ = 0), and a brief evidence note.
 
@@ -67,18 +70,30 @@ Work through every check. For each one record: status (✅ / ❌ / ⚠️), poin
 
 ---
 
-### TIER 1 — CRITICAL (7 pts each, 49 pts max)
+### TIER 1 — FOUNDATION (7 pts each, up to 56 pts)
+
+> **Note:** Foundation checks are necessary but not sufficient. Passing all of them means the project has the structural prerequisites for agents to work — not that agents will work well.
 
 **T1-01 — Agent instruction file exists** [7 pts]
 Look for any of: `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `.github/copilot-instructions.md`, `.instructions.md` at the root.
 - ✅ if any found | ❌ if none found
 - Partial: N/A (binary)
 
-**🔍 DIV — Instruction file divergence** [0 pts — informational flag only]
-If T1-01 found **2 or more** instruction files, read all of them and check for contradictions: conflicting commands, duplicate content, or rules that contradict each other.
-- Record which files were found
-- If divergence detected: add a ⚠️ NOTE in the report under a "Flags" section
-- If consistent (or only 1 file): note "No divergence detected"
+**T1-08 — Instruction file consistency** [7 pts]
+Applies only when T1-01 found **2 or more** instruction files. If only 1 (or 0) files were found, mark N/A (excluded from denominator).
+
+When 2+ files exist, read all of them and compare topic by topic across these 5 categories:
+1. **Run commands** — test, build, lint, validate, dev commands
+2. **Code style / naming rules** — casing, formatting, naming conventions
+3. **Tool preferences** — package manager, formatter, linter
+4. **Prohibited patterns** — explicit `NEVER` / `do not` rules
+5. **Agent behavior rules** — planning, file editing, install gates
+
+- ✅ if 2+ files found AND no contradictions detected across all 5 categories
+- ❌ if 2+ files found AND at least one contradiction detected — cite the specific conflicting lines and which files they came from
+- N/A if 0 or 1 instruction file found
+
+Note: Duplication (the same rule appearing in both files) is NOT a contradiction and does not score ❌.
 
 **T1-02 — Instruction file has run commands** [7 pts]
 Read the instruction file found in T1-01. Look for test, build, lint, validate, or dev commands (e.g., `pnpm test`, `npm run build`, `pytest`, `make test`).
@@ -116,7 +131,7 @@ Read the env template file found in T1-06. Look for: at least one line starting 
 
 ---
 
-### TIER 2 — IMPORTANT (4 pts each, 44 pts max)
+### TIER 2 — IMPORTANT (4 pts each, up to 72 pts)
 
 **T2-01 — Architecture or context doc** [4 pts]
 Look for any documentation that describes how the system is structured — could be a `CONTEXT.md`, `ARCHITECTURE.md`, a `docs/adr/` directory, or any `.md` file in `docs/` whose name or top-level heading indicates it describes the system design, data flow, services, schema, or domain.
@@ -129,9 +144,9 @@ Read `README.md` and the instruction file. Look for explicit naming of: the prim
 - Note: "TypeScript + Next.js + Postgres + Vitest" = ✅; "TypeScript project" alone = ❌
 
 **T2-03 — Definition of done documented** [4 pts]
-Read the instruction file and README. Look for explicit "definition of done" language, OR a description of what "done" means (e.g., "a task is complete when all tests pass", "pnpm validate must pass").
-- ✅ if clear definition found
-- ⚠️ if instruction file exists but no done-definition language found
+Read the instruction file and README. Look for explicit "definition of done" language that includes a reference to a runnable validate or CI command (e.g., `pnpm validate`, `npm run ci`, `make check`).
+- ✅ if done definition found AND it references a specific runnable validate/CI command
+- ⚠️ if instruction file exists but done definition is absent OR exists without referencing a runnable command
 - ❌ if no instruction file
 
 **T2-04 — Single validation command** [4 pts]
@@ -141,14 +156,19 @@ Check `package.json` scripts for a key named `validate`, `check`, `ci`, or `test
 
 **T2-05 — Dev workflow skill** [4 pts]
 List `.agents/skills/` or `.claude/skills/`. Look for a skill whose name or description indicates it covers development workflow, coding guidelines, or project conventions — the kind of skill an agent should load at the start of every task.
-- ✅ if a matching skill found
-- ⚠️ if skills folder exists but no matching skill found
+
+**Matching — two-pass rule:**
+1. **Keyword pass:** Check each skill's `name:`, `description:`, and directory name for any of: `workflow`, `guidelines`, `dev`, `process`, `coding-standards`, `conventions`, `superpowers`, `start`.
+2. **Judgment pass (only if keyword pass finds nothing):** Re-read each unmatched skill's full `description:` and assess: "Does this skill appear intended to be loaded at the start of every coding task, OR does it describe project-wide conventions an agent must follow?" If yes, treat as a match and note which skill matched and why.
+
+- ✅ if a matching skill found (either pass)
+- ⚠️ if skills folder exists but no match found after both passes
 - ❌ if no skills folder
 
 **T2-06 — Framework skill present** [4 pts]
-Using the expected skill keyword(s) from the detected stack (Step 2), check each skill's frontmatter `name:`, `description:`, and directory name for a match.
-- ✅ if a matching skill found
-- ⚠️ if skills folder exists but no framework skill matches
+Using the detected **framework** tags from Step 2 (Next.js, React, Vue, Svelte, Angular, Node API only — exclude test tools, ORMs, and databases), check whether a skill exists for EACH detected framework. Match against each skill's frontmatter `name:`, `description:`, and directory name.
+- ✅ if every detected framework has a matching skill
+- ⚠️ if skills folder exists but one or more framework skills are missing — list which frameworks are unmatched
 - ❌ if no skills folder or stack is unknown
 - Skip (mark N/A, award 0) if `package.json` is absent
 
@@ -172,11 +192,9 @@ Look for: `playwright.config.ts`, `playwright.config.js`, `cypress.config.ts`, `
 - ✅ if config AND at least one spec file found | ❌ otherwise
 - Partial: N/A (binary)
 
-**T2-10 — TDD workflow documented** [4 pts]
+**T2-10 — TDD workflow** [0 pts — informational flag only]
 Read the instruction file, README, and skill files' frontmatter. Look for language describing a test-first development process — writing a failing test before writing implementation code, the red-green-refactor loop, or equivalent.
-- ✅ if TDD process described
-- ⚠️ if instruction file exists but no TDD language found
-- ❌ if no instruction file
+- ℹ️ Note presence or absence. This check does not affect the score — teams that don't use TDD should not be penalized. Record in the report as informational only.
 
 **T2-11 — Operational guardrails documented** [4 pts]
 Read the instruction file. Look for evidence that agent operational safety has been addressed. Check for at least 3 of these 6 concerns:
@@ -227,6 +245,54 @@ Scoring:
 - ⚠️ 0–1 signals and instruction file exists — recommendation provides a default finishing protocol to add
 - ❌ if no instruction file
 
+**T2-15 — Code quality tools configured** [4 pts]
+Check `package.json` devDependencies for at least one dead-code / unused-dependency tool: `knip`, `depcheck`, `npm-check`, `ts-unused-exports`, or `unimported`. Then check `package.json` scripts for a script that invokes one of those tools.
+- ✅ if a qualifying tool is in devDependencies AND a script runs it
+- ⚠️ if tool is present in devDependencies but no script runs it (or vice-versa)
+- ❌ if neither found
+
+**T2-16 — High-impact library skills** [4 pts]
+From the detected stack (Step 2), identify any **high-impact libraries** present: React Query, tRPC, Drizzle, Prisma, TypeORM. For each detected library, check whether a skill exists whose frontmatter `name:`, `description:`, or directory name matches the library keyword.
+- ✅ if every detected high-impact library has a matching skill (or none are detected)
+- ⚠️ if skills folder exists but one or more high-impact library skills are missing — list which libraries are unmatched
+- ❌ if no skills folder and at least one high-impact library is detected
+- Skip (mark N/A, award 0) if `package.json` is absent
+
+**T2-17 — Language discipline documented** [4 pts]
+Detect the primary language from `package.json` (presence of `typescript` in devDependencies, or a `tsconfig.json` at root = TypeScript). Read the instruction file and check for language-specific guardrails:
+- **TypeScript projects** — look for ALL THREE: (1) prohibition of `any` (e.g. "no any", "avoid any", "ban any"), (2) prohibition of type assertions (e.g. "no `as`", "avoid type assertions", "no casting"), (3) reference to `strict` mode or `strictNullChecks`
+- **JavaScript-only projects** — look for at least one explicit convention (e.g. "no var", "use ESM", "always use strict")
+
+Scoring:
+- ✅ all required signals found for the detected language
+- ⚠️ if instruction file exists but one or more signals are missing — list the missing ones
+- ❌ if no instruction file
+
+**T2-18 — Schema validation configured** [4 pts]
+Check `package.json` dependencies (not devDependencies) for a runtime schema validation library: `zod`, `valibot`, `arktype`, `@sinclair/typebox`, `yup`, `joi`, or `superstruct`. Then read the instruction file and check for language directing agents to use schema validation at system boundaries (e.g. "validate all external inputs with Zod", "use schema validation for API responses", "parse env vars with zod").
+- ✅ if a qualifying library is in dependencies AND the instruction file directs agents to use it
+- ⚠️ if library is present but instruction file has no guidance (or guidance exists but no library) — describe what is missing
+- ❌ if neither found
+
+**T2-19 — No duplicate content across instruction files** [4 pts]
+Applies only when T1-01 found **2 or more** instruction files. If only 1 (or 0) files were found, mark N/A (excluded from denominator).
+
+Using the same 5 categories as T1-08, scan for substantive blocks repeated across files:
+1. **Run commands** — same command listed in both files
+2. **Code style / naming rules** — same rule block repeated verbatim or near-verbatim
+3. **Tool preferences** — same tool choice stated in both files
+4. **Prohibited patterns** — same `NEVER` / `do not` rule duplicated
+5. **Agent behavior rules** — same planning/editing/install rule repeated
+
+A block is "substantive" if it is 3 or more lines, or a named rule/command. A single short sentence (e.g. "use TypeScript") repeated in both files does NOT count as duplication.
+
+- ✅ if 2+ files found AND no substantive duplication detected
+- ⚠️ if 2+ files found AND 1–2 categories have substantive duplication — list which categories and files
+- ❌ if 2+ files found AND 3+ categories are duplicated — list all affected categories and files
+- N/A if 0 or 1 instruction file found
+
+Note: This check is about wasted context budget, not correctness. Duplication here does NOT imply contradiction (T1-08 handles that).
+
 ---
 
 ### TIER 3 — ADVANCED (1 pt each, 11 pts max)
@@ -256,8 +322,13 @@ Look for any `.md` file in `docs/` or `src/` subdirectories that documents domai
 - ✅ if at least one domain-specific doc found | ❌ if none
 
 **T3-07 — Subagents defined** [1 pt]
-Look for `.claude/agents/` or `.agents/agents/` containing at least one `.md` file with `tools:` or `model:` in its frontmatter. A skills folder does NOT count — subagents have their own tool restrictions or model config, skills do not.
-- ✅ if at least one qualifying file found | ❌ otherwise
+Look for any of these patterns indicating a task-scoped agent with restricted capabilities:
+- **Claude/Copilot agents:** `.claude/agents/` or `.agents/agents/` — any `.md` file with `tools:` or `model:` in its frontmatter
+- **Prompt-mode agents:** any `.prompt.md` file in the repo with `mode: agent` in its YAML frontmatter
+- **Cursor scoped rules:** any `.mdc` file with `alwaysApply: false` in its frontmatter (indicating a task-scoped rule, not a global one)
+
+A skills folder (`.agents/skills/`) does NOT count — subagents have their own tool restrictions or model config, skills do not.
+- ✅ if at least one qualifying pattern found | ❌ otherwise
 
 **T3-08 — Context scoped by path** [1 pt]
 Look for any instruction or rules file scoped to a subdirectory (not root) — e.g. an `AGENTS.md`, `.instructions.md`, or `.rules.md` inside a subfolder, or a `.prompt.md` with an `applyTo:` pattern targeting a specific path rather than `"**"`.
@@ -288,7 +359,7 @@ Tally all points:
 
 **Normalized score:** `round(raw_pts / max_pts × 100)` — always displayed as `/100` regardless of how many checks are in the audit. This means adding new checks in future never breaks the scale.
 
-Max raw pts: 116 (or 112 if T2-06 is N/A)
+Max raw pts: 143 when T1-08 and T2-19 both apply (2+ instruction files found), 135 when both are N/A (≤1 file). Subtract 4 more for each of T2-06/T2-16 that is also N/A.
 
 | Level | Name | Threshold |
 |-------|------|-----------|
@@ -332,6 +403,9 @@ For every ❌ or ⚠️ check, write a recommendation. Sort by points lost desce
 | Finishing work | `finishing-a-development-branch`, `pr-workflow`, `git-workflow` |
 | Parallelism | `dispatching-parallel-agents`, `subagent-driven-development` |
 | Code review | `requesting-code-review`, `receiving-code-review` |
+| React Query | `react-query-patterns`, `tanstack-query` |
+| tRPC | `trpc-patterns`, `trpc-conventions` |
+| Schema validation | `schema-validation`, `zod-patterns` |
 
 Skill files go in `.agents/skills/<skill-name>/SKILL.md` with frontmatter:
 ```
@@ -356,7 +430,7 @@ description: <one sentence — this is what the AI searches to decide when to lo
 
 DETECTED STACK: <comma-separated list of detected technologies>
 
-🔴 CRITICAL  [XX/49 pts]
+🔴 FOUNDATION  [XX/XX pts]
    <status> T1-01  Agent instruction file ............. <evidence>
    <status> T1-02  Instruction file has commands ....... <evidence>
    <status> T1-03  Instruction file has conventions .... <evidence>
@@ -364,11 +438,9 @@ DETECTED STACK: <comma-separated list of detected technologies>
    <status> T1-05  README has quick start .............. <evidence>
    <status> T1-06  Environment variable template ........ <evidence>
    <status> T1-07  Env vars documented .................. <evidence>
+   <status> T1-08  Instruction file consistency ......... <N/A if ≤1 file; else list files and evidence>
 
-🔍 FLAGS (non-scoring)
-   ℹ️  DIV    Instruction divergence .............. <list files found; "divergent" or "consistent">
-
-🟡 IMPORTANT  [XX/56 pts]
+🟡 IMPORTANT  [XX/72 pts]
    <status> T2-01  Architecture doc ..................... <evidence>
    <status> T2-02  Tech stack documented ................ <evidence>
    <status> T2-03  Definition of done ................... <evidence>
@@ -378,11 +450,16 @@ DETECTED STACK: <comma-separated list of detected technologies>
    <status> T2-07  Test commands documented .............. <evidence>
    <status> T2-08  Pre-commit hooks configured ........... <evidence>
    <status> T2-09  E2E tests configured .................. <evidence>
-   <status> T2-10  TDD workflow documented ............... <evidence>
+   ℹ️ T2-10  TDD workflow (informational) .............. <present or absent — does not affect score>
    <status> T2-11  Operational guardrails ............... <evidence>
    <status> T2-12  Planning protocol .................... <evidence>
    <status> T2-13  Test strategy ........................ <evidence>
    <status> T2-14  Branch finishing protocol ............. <evidence>
+   <status> T2-15  Code quality tools ................... <evidence>
+   <status> T2-16  High-impact library skills ............ <evidence>
+   <status> T2-17  Language discipline ................... <evidence>
+   <status> T2-18  Schema validation .................... <evidence>
+   <status> T2-19  No duplicate instruction content ...... <N/A if ≤1 file; else list any duplicated categories>
 
 🟢 ADVANCED  [XX/11 pts]
    <status> T3-01  UI/Design skill ...................... <evidence>
@@ -420,7 +497,8 @@ Write a file at `ai-audit-report.md` with this exact structure:
 # AI Readiness Audit Report
 
 **Project:** <folder name>
-**Date:** <today's date>
+**Date:** <today's date, YYYY-MM-DD format>
+**Audit Version:** 2.0
 **Score:** XX/100 (XX%) — Level X: Name
 
 ---
@@ -433,7 +511,7 @@ Write a file at `ai-audit-report.md` with this exact structure:
 
 ## Results
 
-### 🔴 Critical [XX/49 pts]
+### 🔴 Foundation [XX/XX pts]
 
 | ID | Check | Status | Evidence |
 |----|-------|--------|----------|
@@ -444,8 +522,9 @@ Write a file at `ai-audit-report.md` with this exact structure:
 | T1-05 | README has quick start | ... | ... |
 | T1-06 | Environment variable template | ... | ... |
 | T1-07 | Env vars documented | ... | ... |
+| T1-08 | Instruction file consistency | ✅/❌/N/A | <N/A if ≤1 file; else list files and any contradictions found> |
 
-### 🟡 Important [XX/40 pts]
+### 🟡 Important [XX/72 pts]
 
 | ID | Check | Status | Evidence |
 |----|-------|--------|----------|
@@ -458,17 +537,16 @@ Write a file at `ai-audit-report.md` with this exact structure:
 | T2-07 | Test commands documented | ... | ... |
 | T2-08 | Pre-commit hooks configured | ... | ... |
 | T2-09 | E2E tests configured | ... | ... |
-| T2-10 | TDD workflow documented | ... | ... |
+| T2-10 | TDD workflow (informational) | ℹ️ | <present or absent — does not affect score> |
 | T2-11 | Operational guardrails documented | ... | ... |
 | T2-12 | Planning protocol documented | ... | ... |
 | T2-13 | Test strategy documented | ... | ... |
 | T2-14 | Branch finishing protocol documented | ... | ... |
-
-### 🔍 Flags (non-scoring)
-
-| Flag | Result | Note |
-|------|--------|------|
-| DIV | ℹ️/N/A | <instruction files found; divergence or consistent> |
+| T2-15 | Code quality tools configured | ... | ... |
+| T2-16 | High-impact library skills | ... | ... |
+| T2-17 | Language discipline documented | ... | ... |
+| T2-18 | Schema validation configured | ... | ... |
+| T2-19 | No duplicate instruction content | ✅/⚠️/❌/N/A | <N/A if ≤1 file; else list duplicated categories and files> |
 
 ### 🟢 Advanced [XX/11 pts]
 
@@ -496,7 +574,34 @@ Write a file at `ai-audit-report.md` with this exact structure:
 
 ---
 
-*Generated by [ai-audit](https://github.com/AlonMiz/ai-audit) — install with `npx skills@latest add AlonMiz/ai-audit`*
+*Generated by [ai-audit](https://github.com/AlonMiz/ai-audit) v2.0 — install with `npx skills@latest add AlonMiz/ai-audit`*
 ```
 
 After writing the file, confirm in chat: "Report written to `ai-audit-report.md`."
+
+---
+
+## STEP 7 — OFFER TO FIX
+
+Immediately after confirming the report, ask the user what to do next using the ask-questions tool. Present exactly these four options:
+
+- **Fix Critical + Important gaps** — applies all mechanical fixes for Tier 1 (⚠️ checks) and Tier 2 (❌ and ⚠️ checks): updating the instruction file with missing sections, creating skill stubs, fixing hook configs. Does not touch Tier 3.
+- **Fix all mechanical gaps** — same as above, plus Tier 3 fixes that require no domain judgment: create skill stubs, add `applyTo` frontmatter to existing prompts, scaffold a subagent file, add typecheck phase to pre-commit hooks, create an MCP config stub.
+- **Walk me through each fix** — present fixes one at a time in order of points lost, waiting for confirmation before each.
+- **Nothing, the report is enough** — stop here.
+
+**Mechanical vs judgment distinction — apply this before acting:**
+
+The following checks cannot be auto-applied without user input. For these, describe what is needed and ask before writing anything:
+- **T3-05 (ADRs)** — requires the user to supply the actual architectural decisions to record.
+- **T3-11 (Eval/drift config)** — requires the user to define the evaluation strategy.
+- Any check where the correct content cannot be inferred from existing repo files.
+
+**If the user chooses option 1 or 2:**
+1. Group related fixes into chunks of up to 5 changes (e.g. all AGENTS.md additions in one chunk, all new skill files in one chunk).
+2. Apply each chunk sequentially — do not parallelize writes across unrelated files.
+3. After all fixes are applied, re-run STEP 1–6 to confirm the score improved and report the new score.
+4. For any judgment-required check that was skipped, explicitly tell the user what they need to provide to earn those points.
+
+**If the user chooses option 3:**
+Present each failing check one at a time: ID, title, points available, and the specific fix. Wait for the user to say "yes", "skip", or provide context before moving to the next fix.
