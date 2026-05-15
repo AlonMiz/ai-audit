@@ -1,6 +1,6 @@
 ---
 name: ai-audit
-description: Audit any project's AI readiness. Scores 28 checks across 3 tiers (100 pts max), produces a 5-level maturity rating, and writes ai-audit-report.md with concrete fix recommendations. Run once on a new project or after major changes.
+description: Audit any project's AI readiness. Scores 32 checks across 3 tiers (116 pts max), produces a 5-level maturity rating, and writes ai-audit-report.md with concrete fix recommendations. Run once on a new project or after major changes.
 ---
 
 You are running an **AI Readiness Audit** on this codebase. Your job is to evaluate how well the project is set up for AI agents to work in it effectively.
@@ -56,7 +56,7 @@ If `package.json` is absent: mark stack as "unknown" and skip T2-06.
 
 ---
 
-## STEP 3 — RUN ALL 28 CHECKS
+## STEP 3 — RUN ALL 32 CHECKS
 
 Work through every check. For each one record: status (✅ / ❌ / ⚠️), points earned (✅ = full points, ⚠️ = 0, ❌ = 0), and a brief evidence note.
 
@@ -116,7 +116,7 @@ Read the env template file found in T1-06. Look for: at least one line starting 
 
 ---
 
-### TIER 2 — IMPORTANT (4 pts each, 40 pts max)
+### TIER 2 — IMPORTANT (4 pts each, 44 pts max)
 
 **T2-01 — Architecture or context doc** [4 pts]
 Look for: `CONTEXT.md`, `ARCHITECTURE.md`, `docs/architecture/`, `docs/adr/` — OR a `.md` file in `docs/` whose **filename** (case-insensitive, without extension) OR **first-level `#` heading** contains any of: `architecture`, `system`, `design`, `pipeline`, `schema`, `service`, `data flow`, `component`, `domain`.
@@ -179,6 +179,55 @@ Read the instruction file, README, and skill files' frontmatter. Look for: `red-
 - ⚠️ if instruction file exists but no TDD language found
 - ❌ if no instruction file
 
+**T2-11 — Operational guardrails documented** [4 pts]
+Read the instruction file. Look for evidence that agent operational safety has been addressed. Check for at least 3 of these 6 signals:
+1. **Prohibition language** — `NEVER`, `do not`, `never use` applied to terminal commands or tools
+2. **Shell one-liner ban** — explicit mention of `sed`, `awk`, `one-liner`, `shell script`, `grep -A`, `node -e`, `python3 -c`, or equivalent
+3. **No terminal file editing** — rule against editing files via terminal; must use file-editing tools instead
+4. **Script discipline** — instruction to use `package.json` scripts / named scripts rather than raw commands
+5. **Install gate** — must ask or confirm before running `pnpm add`, `npm install`, or equivalent
+6. **Temp file safety** — explicit instruction on where temp files go (e.g. `./tmp/`, not `/tmp/`)
+
+Scoring:
+- ✅ if 3 or more signals found
+- ⚠️ if 1–2 signals found — recommendation lists the missing signals
+- ⚠️ if 0 signals found and instruction file exists — recommendation lists all 6
+- ❌ if no instruction file
+
+**T2-12 — Planning protocol documented** [4 pts]
+Read the instruction file. Look for ALL THREE of:
+1. **When** — language like `before starting`, `before implementing`, `before complex tasks`, `create a plan`, `always plan`
+2. **Where** — an explicit storage path like `/plans/`, `docs/plans/`, `plans/`, or any named directory for plans
+3. **How** — reference to a planning skill, spec approach, or TDD/design step
+
+Scoring:
+- ✅ all three present
+- ⚠️ if 1–2 of the three present — recommendation tells the agent which parts are missing and what to add
+- ⚠️ if none present and instruction file exists — recommendation provides a default planning protocol to add
+- ❌ if no instruction file
+
+**T2-13 — Test strategy documented** [4 pts]
+Read the instruction file and README. Look for:
+1. **Multiple test types named** — at least 2 of: `unit`, `integration`, `storybook`, `testing-library`, `e2e`, `playwright`, `cypress`, `vitest`, `jest`
+2. **Selection guidance** — language indicating when to use which: `depending on`, `choose`, `appropriate`, `scope`, `consider`, `for components`, `for user flows`, `for logic`
+
+Scoring:
+- ✅ both present — test types listed AND guidance on when to use which
+- ⚠️ if test types listed but no selection guidance — recommendation suggests adding a test selection guide
+- ⚠️ if neither present and instruction file exists — recommendation provides a default test strategy section to add
+- ❌ if no instruction file
+
+**T2-14 — Branch finishing protocol documented** [4 pts]
+Read the instruction file. Look for at least 2 of these 3 signals:
+1. **Merge/integration strategy** — keywords: `merge`, `pull request`, `PR`, `squash`, `rebase`, `main`, `branch`
+2. **Pre-merge summary** — keywords: `summary`, `write a summary`, `describe what was implemented`, `before merging`
+3. **Cleanup** — keywords: `worktree`, `branch deletion`, `clean up`, `remove the branch`, `git worktree remove`
+
+Scoring:
+- ✅ 2 or more signals found
+- ⚠️ 0–1 signals and instruction file exists — recommendation provides a default finishing protocol to add
+- ❌ if no instruction file
+
 ---
 
 ### TIER 3 — ADVANCED (1 pt each, 11 pts max)
@@ -239,7 +288,7 @@ Tally all points:
 - ⚠️ and ❌ = 0 pts
 - N/A checks do not affect the denominator
 
-Total possible: 100 (or 96 if T2-06 is N/A)
+Total possible: 116 (or 112 if T2-06 is N/A)
 
 | Level | Name | Threshold |
 |-------|------|-----------|
@@ -256,12 +305,14 @@ Total possible: 100 (or 96 if T2-06 is N/A)
 For every ❌ or ⚠️ check, write a recommendation. Sort by points lost descending (Tier 1 first, then Tier 2, then Tier 3). For each recommendation:
 
 1. State the check ID, name, and points recoverable
-2. Give the exact fix — a concrete action with a copy-pasteable example (file to create, content to add, command to run)
-3. For skill gaps, reference the skills registry below
+2. Give a **direct, agent-executable instruction** — tell the agent exactly what file to create or what content to add, as if the user will say "fix it" and the agent will act immediately. Do NOT include copy-paste blocks for the user — the user's agent will do the work.
+3. For partial passes (⚠️), only describe what is **missing** — do not repeat what already exists.
+4. For skill gaps, reference the skills registry below
 
 **Tone:**
-- For ❌: "Create X" / "Add X"
-- For ⚠️: "You have the file — add this to it:"
+- For ❌: "Create `<path>` with `<description of content>`"
+- For ⚠️: "In `<instruction file>`, add: `<description of missing content only>`"
+- For T2-11/12/13/14 ⚠️: list only the specific signals that were NOT found
 
 **Skills registry** (reference when recommending skill creation):
 
@@ -300,7 +351,7 @@ description: <one sentence — this is what the AI searches to decide when to lo
 ╔════════════════════════════════════════════════════════════╗
 ║          AI READINESS AUDIT — <folder name>                ║
 ║                                                            ║
-║   Score: XX/100  (XX%)     Level X — Name                  ║
+   ║   Score: XX/116  (XX%)     Level X — Name                  ║
 ╚════════════════════════════════════════════════════════════╝
 
 DETECTED STACK: <comma-separated list of detected technologies>
@@ -317,7 +368,7 @@ DETECTED STACK: <comma-separated list of detected technologies>
 🔍 FLAGS (non-scoring)
    ℹ️  DIV    Instruction divergence .............. <list files found; "divergent" or "consistent">
 
-🟡 IMPORTANT  [XX/40 pts]
+🟡 IMPORTANT  [XX/56 pts]
    <status> T2-01  Architecture doc ..................... <evidence>
    <status> T2-02  Tech stack documented ................ <evidence>
    <status> T2-03  Definition of done ................... <evidence>
@@ -328,6 +379,10 @@ DETECTED STACK: <comma-separated list of detected technologies>
    <status> T2-08  Pre-commit hooks configured ........... <evidence>
    <status> T2-09  E2E tests configured .................. <evidence>
    <status> T2-10  TDD workflow documented ............... <evidence>
+   <status> T2-11  Operational guardrails ............... <evidence>
+   <status> T2-12  Planning protocol .................... <evidence>
+   <status> T2-13  Test strategy ........................ <evidence>
+   <status> T2-14  Branch finishing protocol ............. <evidence>
 
 🟢 ADVANCED  [XX/11 pts]
    <status> T3-01  UI/Design skill ...................... <evidence>
@@ -346,10 +401,10 @@ DETECTED STACK: <comma-separated list of detected technologies>
 TOP RECOMMENDATIONS (sorted by impact)
 
   1. [+X pts]  <ID> — <title>
-               <concrete fix with copy-pasteable example>
+               <agent-executable instruction: what file to create/edit and what to add>
 
   2. [+X pts]  <ID> — <title>
-               <concrete fix>
+               <agent-executable instruction>
 
   ... (list all failing checks)
 
@@ -366,7 +421,7 @@ Write a file at `ai-audit-report.md` with this exact structure:
 
 **Project:** <folder name>
 **Date:** <today's date>
-**Score:** XX/100 (XX%) — Level X: Name
+**Score:** XX/116 (XX%) — Level X: Name
 
 ---
 
@@ -404,6 +459,10 @@ Write a file at `ai-audit-report.md` with this exact structure:
 | T2-08 | Pre-commit hooks configured | ... | ... |
 | T2-09 | E2E tests configured | ... | ... |
 | T2-10 | TDD workflow documented | ... | ... |
+| T2-11 | Operational guardrails documented | ... | ... |
+| T2-12 | Planning protocol documented | ... | ... |
+| T2-13 | Test strategy documented | ... | ... |
+| T2-14 | Branch finishing protocol documented | ... | ... |
 
 ### 🔍 Flags (non-scoring)
 
@@ -433,11 +492,7 @@ Write a file at `ai-audit-report.md` with this exact structure:
 
 ### [+X pts] T1-XX — <title>
 
-<concrete description of fix>
-
-\`\`\`<language>
-<copy-pasteable example>
-\`\`\`
+<agent-executable instruction: what file to create/edit and what content to add. For ⚠️ partial passes, list only the missing signals.>
 
 ---
 

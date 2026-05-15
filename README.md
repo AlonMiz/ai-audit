@@ -2,7 +2,7 @@
 
 An agent skill that audits any codebase's AI readiness in one command.
 
-Scores **28 checks** across 3 tiers (100 pts max), outputs a **5-level maturity rating**, and writes `ai-audit-report.md` with concrete, copy-pasteable fix recommendations.
+Scores **32 checks** across 3 tiers (116 pts max), outputs a **5-level maturity rating**, and writes `ai-audit-report.md` with concrete, copy-pasteable fix recommendations.
 
 ## Install
 
@@ -34,7 +34,7 @@ The basics. Without these, an AI agent has no reliable orientation in your proje
 | T1-06 | Environment variable template (`.env.example`) |
 | T1-07 | Env vars are documented with comments |
 
-### 🟡 Important — 10 checks × 4 pts = 40 pts
+### 🟡 Important — 14 checks × 4 pts = 56 pts
 
 Without these, the AI will make recurring mistakes on conventions and workflow.
 
@@ -50,6 +50,10 @@ Without these, the AI will make recurring mistakes on conventions and workflow.
 | T2-08 | Pre-commit hooks configured (lint + format + typecheck) |
 | T2-09 | E2E tests configured |
 | T2-10 | TDD workflow documented |
+| T2-11 | Operational guardrails documented |
+| T2-12 | Planning protocol documented |
+| T2-13 | Test strategy documented |
+| T2-14 | Branch finishing protocol documented |
 
 ### 🟢 Advanced — 11 checks × 1 pt = 11 pts
 
@@ -95,7 +99,7 @@ The skill is a single `SKILL.md` file. When invoked, your agent:
 
 1. Reads key project files (instruction files, README, package.json, skill folders, docs, config files) — never touches `src/`
 2. Detects the stack from `package.json`
-3. Runs all 28 checks in order, recording evidence for each
+3. Runs all 32 checks in order, recording evidence for each
 4. Scores and grades the result
 5. Generates ranked recommendations with copy-pasteable fixes
 6. Writes `ai-audit-report.md` and prints a summary to chat

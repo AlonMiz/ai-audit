@@ -1,8 +1,8 @@
 # AI Readiness Audit Report
 
 **Project:** newz  
-**Date:** 2026-05-14  
-**Score:** 77/100 (77%) — Level 4: Optimized
+**Date:** 2026-05-15  
+**Score:** 85/116 (73%) — Level 3: Standardized
 
 ---
 
@@ -26,7 +26,7 @@ Next.js 16, React 19, Drizzle ORM, Neon PostgreSQL, Vitest, Playwright
 | T1-06 | Environment variable template | ✅ | `.env.example` found at root |
 | T1-07 | Env vars documented | ✅ | `.env.example` has `#` comment blocks for every variable group |
 
-### 🟡 Important [24/40 pts]
+### 🟡 Important [32/56 pts]
 
 | ID | Check | Status | Evidence |
 |----|-------|--------|----------|
@@ -40,6 +40,10 @@ Next.js 16, React 19, Drizzle ORM, Neon PostgreSQL, Vitest, Playwright
 | T2-08 | Pre-commit hooks configured | ⚠️ | `lefthook.yml` covers lint (`biome lint`) and format (`biome check`) but **no typecheck or test phase** |
 | T2-09 | E2E tests configured | ✅ | `e2e/playwright.config.ts` + 7 spec files (feed, cluster, dismiss, search, settings, sidebar, smoke) |
 | T2-10 | TDD workflow documented | ⚠️ | AGENTS.md and README contain no TDD/red-green-refactor language; only `task.prompt.md` (a prompt file, not instruction file) mentions it |
+| T2-11 | Operational guardrails documented | ✅ | AGENTS.md has `NEVER use non-standard shell one-liners`, `NEVER edit files via terminal`, `ALWAYS ask before running package installs`, `pnpm <script>` discipline, `./tmp/` for temp files — 5/6 signals |
+| T2-12 | Planning protocol documented | ⚠️ | AGENTS.md has no "create a plan before..." instruction; `/plans/` directory exists but storage location not mandated in instructions; no planning skill referenced |
+| T2-13 | Test strategy documented | ⚠️ | AGENTS.md lists `pnpm test:unit` and `pnpm test:e2e` but provides no guidance on when to choose unit vs integration vs E2E |
+| T2-14 | Branch finishing protocol documented | ✅ | AGENTS.md has merge strategy (merge to `main` locally), pre-merge summary requirement, and worktree cleanup instruction — 3/3 signals |
 
 ### 🟢 Advanced [4/11 pts]
 
@@ -63,163 +67,48 @@ Next.js 16, React 19, Drizzle ORM, Neon PostgreSQL, Vitest, Playwright
 
 ### [+4 pts] T2-05 — Dev workflow skill
 
-Add a `dev-guidelines` skill to `.agents/skills/`. The AGENTS.md already references this skill by name but it's not installed in the project.
-
-```bash
-mkdir -p .agents/skills/dev-guidelines
-```
-
-`.agents/skills/dev-guidelines/SKILL.md`:
-```markdown
----
-name: dev-guidelines
-description: Development workflow guidelines for this project — shadcn/ui-first components, terminal safety rules, E2E test requirements, and definition of done. Use when starting any implementation task, bug fix, or code change.
----
-
-# Dev Guidelines
-
-See AGENTS.md for the full set of project conventions.
-```
+Create `.agents/skills/dev-guidelines/SKILL.md` with `name: dev-guidelines` and a description referencing this project's conventions — shadcn/ui-first, terminal safety rules, E2E requirements, and definition of done.
 
 ### [+4 pts] T2-06 — Framework skill
 
-Add a `nextjs-patterns` skill covering Next.js App Router, tRPC, and server/client component patterns.
-
-```bash
-mkdir -p .agents/skills/nextjs-patterns
-```
-
-`.agents/skills/nextjs-patterns/SKILL.md`:
-```markdown
----
-name: nextjs-patterns
-description: Next.js App Router patterns for this project — server vs client components, tRPC usage, route handlers, data fetching, and React 19 best practices.
----
-
-# Next.js Patterns
-...
-```
+Create `.agents/skills/nextjs-patterns/SKILL.md` with `name: nextjs-patterns` and a description covering Next.js App Router patterns, server vs client components, tRPC usage, and React 19 best practices for this project.
 
 ### [+4 pts] T2-08 — Pre-commit hooks: add typecheck phase
 
-`lefthook.yml` covers lint and format but no typecheck. Add a typecheck command:
-
-```yaml
-pre-commit:
-  commands:
-    # ...existing commands...
-    typecheck:
-      glob: "*.{ts,tsx}"
-      run: pnpm typecheck
-```
+In `lefthook.yml`, add a `typecheck` command to the `pre-commit` hook that runs `pnpm typecheck` on `*.{ts,tsx}` files.
 
 ### [+4 pts] T2-10 — TDD workflow documented
 
-Add a TDD section to `AGENTS.md` or `README.md`. Example addition to AGENTS.md:
+In `AGENTS.md`, add a "TDD Workflow" section specifying red-green-refactor: write a failing test first, write minimum code to pass, refactor, then run `pnpm validate`.
 
-```markdown
-## TDD Workflow
+### [+4 pts] T2-12 — Planning protocol documented
 
-Follow red-green-refactor:
-1. Write a failing test that describes the expected behaviour
-2. Write the minimum code to make it pass
-3. Refactor — clean up without changing behaviour
-4. Run `pnpm validate` before marking done
+In `AGENTS.md`, add a "Planning" section specifying: (1) create a plan before starting any complex task, (2) store plans in `/plans/` as markdown files with task checklists, (3) invoke the `writing-plans` skill for structured plans.
 
-Never write implementation code before a failing test exists.
-```
+### [+4 pts] T2-13 — Test strategy documented
+
+In `AGENTS.md`, add a "Test Strategy" section explaining when to use each test type: unit tests (Vitest) for pure logic and services, Playwright E2E for user-facing flows and pages — and that every implementation plan must include a test coverage decision.
 
 ### [+1 pt] T3-02 — Brainstorming/planning skill
 
-Install or create a `brainstorming` or `writing-plans` skill locally:
-
-```bash
-mkdir -p .agents/skills/writing-plans
-```
-
-`.agents/skills/writing-plans/SKILL.md`:
-```markdown
----
-name: writing-plans
-description: Use when you have a spec or requirements for a multi-step task, before touching code — structures implementation plans as ordered tasks with test coverage notes.
----
-```
+Create `.agents/skills/writing-plans/SKILL.md` with `name: writing-plans` and a description for use when structuring implementation plans before writing code.
 
 ### [+1 pt] T3-03 — Debugging skill
 
-Add a `systematic-debugging` skill to the project:
-
-```bash
-mkdir -p .agents/skills/systematic-debugging
-```
-
-`.agents/skills/systematic-debugging/SKILL.md`:
-```markdown
----
-name: systematic-debugging
-description: Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes — reproduce, minimise, hypothesise, instrument, fix, regression-test.
----
-```
+Create `.agents/skills/systematic-debugging/SKILL.md` with `name: systematic-debugging` and a description for use when encountering bugs or test failures — reproduce, minimise, hypothesise, fix, regression-test.
 
 ### [+1 pt] T3-05 — ADRs present
 
-Create an ADR directory and record at least one architectural decision already made:
-
-```bash
-mkdir -p docs/adr
-```
-
-`docs/adr/0001-use-drizzle-orm.md`:
-```markdown
-# ADR 0001 — Use Drizzle ORM over Prisma
-
-**Status:** Accepted  
-**Date:** 2026-03-21
-
-## Decision
-Use Drizzle ORM with postgres-js driver for all database access.
-
-## Rationale
-Drizzle provides type-safe SQL with zero runtime overhead and works natively with Neon Serverless Postgres.
-```
+Create `docs/adr/` and add at least one ADR recording an architectural decision already made (e.g. choosing Drizzle ORM, Neon Postgres, or the clustering threshold approach).
 
 ### [+1 pt] T3-08 — Context scoped by path
 
-Add a path-scoped instruction file to a subdirectory, e.g. for the pipeline:
-
-`src/server/pipeline/.instructions.md` (or use `applyTo` in a prompt):
-```markdown
-# Pipeline Instructions
-
-These files implement the FeedFetcher and StoryProcessor. Key rules:
-- Never import from `src/app/` — pipeline is server-only
-- All AI calls must use the `ai` SDK, not direct provider SDKs
-- See CLUSTERING.md for threshold rationale
-```
-
-Or add an `applyTo` frontmatter to a targeted prompt file (not `"**"`):
-```yaml
----
-applyTo: "src/server/pipeline/**"
----
-```
+Add an `applyTo` frontmatter to a targeted `.prompt.md` in `src/server/pipeline/` scoped to `src/server/pipeline/**` instead of `"**"` — or add a `.instructions.md` in that subdirectory with pipeline-specific rules.
 
 ### [+1 pt] T3-09 — Finishing/integration workflow
 
-Install the `finishing-a-development-branch` skill locally (already referenced in AGENTS.md but not installed):
-
-```bash
-mkdir -p .agents/skills/finishing-a-development-branch
-```
-
-`.agents/skills/finishing-a-development-branch/SKILL.md`:
-```markdown
----
-name: finishing-a-development-branch
-description: Use when implementation is complete and all tests pass — guides merge-to-main, pre-merge summary writing, and worktree cleanup.
----
-```
+Create `.agents/skills/finishing-a-development-branch/SKILL.md` with `name: finishing-a-development-branch` and a description for use when implementation is complete — guides pre-merge summary, merge to main, and worktree cleanup. (Already referenced in AGENTS.md but not installed locally.)
 
 ---
 
-*Generated by ai-audit — drop `.github/prompts/ai-audit.prompt.md` into any project to run this audit.*
+*Generated by [ai-audit](https://github.com/AlonMiz/ai-audit) — install with `npx skills@latest add AlonMiz/ai-audit`*
