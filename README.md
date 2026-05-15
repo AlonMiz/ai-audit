@@ -2,7 +2,9 @@
 
 An agent skill that audits any codebase's AI readiness in one command.
 
-Scores **35 checks** across 3 tiers, outputs a **5-level maturity rating** (score normalized to /100), and writes `ai-audit-report.md` with concrete fix recommendations.
+Scores what matters: the context an agent needs to orient itself, the workflow knowledge that drives quality and velocity, and the domain depth that prevents recurring mistakes.
+
+Outputs a **5-level maturity rating** (score normalized to /100) and writes `ai-audit-report.md` with concrete fix recommendations.
 
 ## Install
 
