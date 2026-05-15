@@ -8,7 +8,7 @@ You are running an **AI Readiness Audit** on this codebase. Your job is to evalu
 **Rules:**
 - Read files only. Do NOT modify any project file except writing `ai-audit-report.md` at the end.
 - Be systematic: work through every check in order before scoring.
-- Be evidence-based: record exactly what you found (filename, line content) for each check.
+- Be evidence-based: record exactly what you found (filename, line content) for each check. **Never record values from env or secret files** (`.env*`, credential configs) — record only key names or file presence.
 - Do not infer intent — if a file is absent, mark it absent.
 
 ---
