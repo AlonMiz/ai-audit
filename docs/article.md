@@ -36,81 +36,36 @@ A poorly set-up repo doesn't make the AI stupid. It makes the AI *uninformed*. A
 
 ---
 
-## Check 1 — Operational guardrails
+## What the audit actually catches
 
-This one trips almost every project on the first audit.
+35 checks total. Here are four that show up most often in the real reports — with actual audit output.
 
-The check looks for whether the agent has been explicitly told how to operate safely: no ad-hoc shell commands, no editing files via the terminal, no installing packages without asking, all reusable operations wrapped in named scripts.
+**Operational guardrails** — Does the agent know how to operate safely? No ad-hoc shell commands, no editing files via terminal, no installing packages mid-task. A passing project has explicit rules like:
 
-A passing project has lines like these in its `AGENTS.md`:
-
-> *"Never inline bash loops in ad-hoc terminal calls"*
-> *"create a reusable script in scripts/"*
+> *"Never inline bash loops in ad-hoc terminal calls — create a reusable script in scripts/"*
 > *"NEVER git push without explicit permission"*
 
-That's from a real audit. The project scored ✅ because it had at least 3 of the 6 required signals.
+Without this, the agent runs whatever it decides makes sense. `sed -i` a file instead of using the editor. Chain 5 piped commands. Install a package mid-task. Each is a failure you won't notice until it's already cost you.
 
-Without this, the agent is free to run whatever it decides makes sense in the moment. It might `sed -i` a file instead of using the editor. It might chain 5 piped commands in one terminal call. It might `npm install` a package mid-task. Each is a failure you won't notice until it's already cost you.
-
-The fix is 5 lines in your instruction file. The agent will follow them.
-
----
-
-## Check 2 — Code quality over time
-
-AI generates volume. It writes fast, writes a lot. It doesn't track what it's already written.
-
-Without automated quality gates, a codebase worked on by AI agents over weeks develops specific pathologies: dead exports no one calls, duplicated logic spread across three files because the agent didn't know it already existed elsewhere, functions with cyclomatic complexity so high no human would have written them by hand.
-
-`fallow` is a static analysis tool that detects dead exports, duplicated logic, and high-complexity functions in one pass. A project that passes this check has it wired into its validate script:
+**Code quality over time** — AI writes fast and doesn't track what it's already written. Without automated gates: dead exports, duplicated logic across three files, functions complex enough to be unmaintainable. We recommend [`fallow`](https://github.com/nicolo-ribaudo/fallow) — written in Rust, runs in milliseconds, and covers dead code detection, duplication, and complexity analysis in a single install instead of three separate tools:
 
 > *`"validate": "npm run type-check && npm run lint && fallow dead-code && fallow dupes && fallow health"`*
 
-That runs on every commit. Unused exports don't survive. Duplicated logic gets flagged before it spreads. Functions that are too complex to safely modify get surfaced before the next agent session adds more on top.
+The check has to run automatically on every commit, not on request. That's the whole point.
 
-The principle is the same regardless of the tool: the check has to run automatically, not on request.
-
-AI-generated code is not inherently lower quality. But it needs the same guard rails any high-velocity output needs. Without them, you find out about the debt three months later.
-
----
-
-## Check 3 — TDD
-
-This check is informational — it doesn't affect the score. But it's in the audit because it determines whether you're building something verifiable or just accumulating code that looks tested.
-
-The failure mode is epistemic. If no test failed before the code existed, you have no evidence the test would have caught the bug. The agent writes code, writes a test that passes against that code, calls it done. You have coverage. You have nothing.
-
-A project with TDD properly documented has entries like:
+**TDD** *(informational — doesn't affect your score, but flagged because the AI era changed the calculus)* — The old excuse for skipping tests was time. Writing tests was slow. With AI, that excuse is gone. Tests are fast to write now, and the velocity only goes up. What remains is the discipline problem: without red-green-refactor, the agent writes code, then writes a test that passes against that code, and calls it done. You have coverage. You have nothing. The test only proves the code runs — not that it solves the problem you stated. That's what red-green-refactor prevents: it forces a failing test first, so you know what you're actually verifying.
 
 > *"NEVER just change the test to match the current implementation"*
 
-And installed skills like `test-driven-development` and `red-green-refactor` — so the agent knows to reach for them when starting a feature, not verify them after.
+**Instruction file quality** — The check most projects miss. The file exists, has content, passes all the other checks — and still doesn't work. Anthropic's own [CLAUDE.md documentation](https://docs.anthropic.com/en/docs/claude-code/memory) is direct: *"target under 200 lines per CLAUDE.md file. Longer files consume more context and reduce adherence."* Four signals: ≤ 200 lines, structured with headers, concrete commands and paths, no filler. A real partial fail:
+
+> *T2-23 — ⚠️ 3 of 4 signals missing: file is 340 lines, no section headers, contains "write good tests" without a concrete test strategy attached*
+
+That agent was technically reading the file. It just wasn't following it. The fix is almost always a rewrite, not an addition.
 
 ---
 
-## Check 4 — Instruction file quality
-
-This one was added recently because it's easy to miss: the instruction file exists, has content, passes all the other checks — and still doesn't work.
-
-Anthropic's own [CLAUDE.md documentation](https://docs.anthropic.com/en/docs/claude-code/memory) is direct: *"target under 200 lines per CLAUDE.md file. Longer files consume more context and reduce adherence."* Their best practices page puts it even more bluntly: *"Bloated CLAUDE.md files cause Claude to ignore your actual instructions."*
-
-The check looks for four signals:
-1. **Length ≤ 200 lines** — not a soft guideline, an observed performance threshold
-2. **Structured with headers** — a flat bullet list of 80 rules is harder to navigate than 6 headed sections
-3. **Concrete commands and paths** — `pnpm validate`, `src/api/`, `lefthook` — not "follow best practices"
-4. **No filler** — "write clean code" without a spec attached is noise in the context window
-
-A partial pass on a real project looked like this:
-
-> *T2-23 — ⚠️ Instruction file exists but 3 of 4 signals missing: file is 340 lines, no section headers, contains "write good tests" without a concrete test strategy attached*
-
-That project's agent was technically reading the instruction file. It just wasn't following it — because 340 lines of flat bullets is not a brief anyone follows consistently.
-
-The fix is usually a rewrite, not an addition.
-
----
-
-Each individual check catches a specific failure mode. Together, they produce a single number.
+Each check catches a specific failure mode. Together, they produce a single number.
 
 ## The five levels
 
