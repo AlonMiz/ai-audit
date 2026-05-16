@@ -24,6 +24,8 @@ That means: if you haven't written a rule down, the rule doesn't exist for the a
 
 A poorly set-up repo doesn't make the AI stupid. It makes the AI *uninformed*. And uninformed AI invents. It guesses. It uses the default. It marks things complete when they aren't.
 
+One thing worth saying upfront: the things that make a repo readable for an agent are mostly the same things that make it maintainable for a human. Documented commands. Automated quality gates. Test discipline. Clean, navigable structure. AI readiness isn't a separate category you bolt on — it's repo hygiene with a different name and a concrete checklist.
+
 ---
 
 ## What "not ready" actually looks like
@@ -84,6 +86,14 @@ Level 4 (the real audit report referenced above scored 84%) means the agent can 
 The jump from Level 2 to Level 3 usually takes an afternoon. Level 4 takes a focused session. Level 5 requires deliberate investment — subagents, scoped context, evals.
 
 Not every project needs Level 5. A solo side project you'll touch a dozen times doesn't need the same setup as a team codebase with multiple agents running in parallel. Most projects need to stop being Level 1. Level 3 is enough to stop losing velocity to the same avoidable gaps.
+
+---
+
+## On other tools in this space
+
+There are other tools that do something similar. `npx check-ai`, `aiready-cli` — run them and they scan your repo and tell you what's present. That's a reasonable thing to want.
+
+The difference is what question they're asking. A presence check tells you the file exists. This audit asks whether it works. Is the instruction file structured and concrete, or is it 340 lines of flat bullets the agent technically reads but doesn't follow? Does the validate script cover the right ground? Is the test strategy documented in a way an agent would actually use? Not the same question — not a better one necessarily, just a different one.
 
 ---
 
