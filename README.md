@@ -111,6 +111,10 @@ The skill is a single `SKILL.md` file. When invoked, your agent:
 5. Generates ranked recommendations with copy-pasteable fixes
 6. Writes `ai-audit-report.md` and prints a summary to chat
 
+## Background
+
+[Your AI agent isn't the problem. Your repo is.](docs/article.md) — the story behind this tool, why AI-unready repos cause avoidable failures, and a walkthrough of 4 checks that matter most.
+
 ## License
 
 MIT
