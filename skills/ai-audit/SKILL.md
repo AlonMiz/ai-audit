@@ -6,7 +6,7 @@ description: "Audit any project's AI readiness. Scores checks across 3 tiers, pr
 You are running an **AI Readiness Audit** on this codebase. Your job is to evaluate how well the project is set up for AI agents to work in it effectively.
 
 **Rules:**
-- Read files only. Do NOT modify any project file except writing `ai-audit-report.md` at the end.
+- Read files only. Do NOT modify any project file except writing `ai-audit-report.md` at the end. If `ai-audit-report.md` already exists, overwrite it.
 - Be systematic: work through every check in order before scoring.
 - Be evidence-based: record exactly what you found (filename, line content) for each check. **Never record values from env or secret files** (`.env*`, credential configs) — record only key names or file presence.
 - Do not infer intent — if a file is absent, mark it absent.
@@ -19,10 +19,11 @@ Read these files before running any checks. If context limits prevent reading a 
 
 **Priority order:**
 1. Root level: `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `.github/copilot-instructions.md`, `.instructions.md`, `README.md`, `package.json`, `.env.example`, `.env.template`, `.env.sample`, `.env.dist`, `lefthook.yml`, `.lefthook.yml`, `.pre-commit-config.yaml`
-2. Skills folders: `.agents/skills/` and `.claude/skills/` — list all skill directories, then open each skill's `SKILL.md` or `README.md` to read its YAML frontmatter (`name:`, `description:`)
-3. Docs: `docs/` folder — list all `.md` files, read filenames and first-level headings
-4. E2E: `e2e/` or `tests/` — list files only (no need to read content)
-5. Config files: `playwright.config.*`, `cypress.config.*`, `Makefile`, `Justfile`
+2. Skills folders: `.agents/skills/` and `.claude/skills/` — list all skill directories, then open each skill's `SKILL.md` or `README.md` to read its YAML frontmatter (`name:`, `description:`). **Shortcut:** if the instruction file already contains a complete skills table listing every skill's name and description, use it directly — do not open individual skill files unless the table data is missing or incomplete.
+3. Prompt files: `.agents/prompts/`, `.vscode/prompts/`, or any `*.prompt.md` files — list filenames and read YAML frontmatter (`applyTo:`, `mode:`) only
+4. Docs: `docs/` folder — list all `.md` files, read filenames and first-level headings
+5. E2E: `e2e/` or `tests/` — list files only (no need to read content)
+6. Config files: `playwright.config.*`, `cypress.config.*`, `Makefile`, `Justfile`
 
 **Never read `src/` source code files** — they are not needed for any check.
 
@@ -54,7 +55,7 @@ Parse `package.json` `dependencies` and `devDependencies`. Match against this ta
 
 If `package.json` is absent: mark stack as "unknown" and skip T2-06 and T2-16.
 
-**Keyword matching rule for all skill-based checks:** Match keywords against (1) the skill's YAML frontmatter `description:` field, (2) the `name:` field, or (3) the skill filename/directory name. Full-text content search is NOT required. You must open each skill file to read frontmatter — filename alone is not sufficient.
+**Keyword matching rule for all skill-based checks:** Match keywords against (1) the skill's YAML frontmatter `description:` field, (2) the `name:` field, or (3) the skill filename/directory name. Full-text content search is NOT required. You must open each skill file to read frontmatter — filename alone is not sufficient. **Exception:** if you already collected skill data from a skills table in the instruction file (see Step 1 shortcut), use that data — no need to re-open each file.
 
 ---
 
@@ -145,6 +146,8 @@ List `.agents/skills/` or `.claude/skills/`. Look for a skill whose name or desc
 **Matching — two-pass rule:**
 1. **Keyword pass:** Check each skill's `name:`, `description:`, and directory name for any of: `workflow`, `guidelines`, `dev`, `process`, `coding-standards`, `conventions`, `superpowers`, `start`.
 2. **Judgment pass (only if keyword pass finds nothing):** Re-read each unmatched skill's full `description:` and assess: "Does this skill appear intended to be loaded at the start of every coding task, OR does it describe project-wide conventions an agent must follow?" If yes, treat as a match and note which skill matched and why.
+
+**Borderline example:** A skill named `using-superpowers` with description "establishes how to find and use skills, requiring Skill tool invocation before ANY response" — this matches `start` in the keyword pass (keyword pass wins). A skill named `article-writing` with description "write polished long-form content" — this does NOT match either pass (no dev workflow relevance). When in doubt, the judgment pass should ask: "would an agent load this at task start to orient itself?" If yes, match.
 
 - ✅ if a matching skill found (either pass)
 - ⚠️ if skills folder exists but no match found after both passes
