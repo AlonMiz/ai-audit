@@ -106,7 +106,7 @@ The skill is a single `SKILL.md` file. When invoked, your agent:
 
 1. Reads key project files (instruction files, README, package.json, skill folders, docs, config files) — never touches `src/`
 2. Detects the stack from `package.json`
-3. Runs all 35 checks in order, recording evidence for each
+3. Runs all 43 checks in order, recording evidence for each
 4. Scores and grades the result
 5. Generates ranked recommendations with copy-pasteable fixes
 6. Writes `ai-audit-report.md` and prints a summary to chat

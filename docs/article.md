@@ -12,7 +12,7 @@ The agent didn't fail. You handed it an unreadable brief and expected a good res
 - An AI agent's only memory is your repo's files. If you haven't written something down, it doesn't exist for the agent.
 - Most repos fail basic readiness checks — not because developers are careless, but because the checklist is long and no one runs it twice.
 - This article walks through 4 checks that cause the most avoidable failures, with real examples from an actual audit.
-- There's a command that runs all 35 checks and scores your repo out of 100. It takes about 2 minutes.
+- There's a command that runs all 43 checks and scores your repo out of 100. It takes about 2 minutes.
 
 ---
 
@@ -40,7 +40,7 @@ One thing worth saying upfront: the things that make a repo readable for an agen
 
 ## What the audit actually catches
 
-35 checks total. Here are four that show up most often in the real reports — with actual audit output.
+43 checks total. Here are four that show up most often in the real reports — with actual audit output.
 
 **Operational guardrails** — Does the agent know how to operate safely? No ad-hoc shell commands, no editing files via terminal, no installing packages mid-task. A passing project has explicit rules like:
 
@@ -126,6 +126,6 @@ Score: 84/100 (84%) — Level 4: Optimized
 ⚠️  T2-23 Instruction file quality — 340 lines, no section headers
 ```
 
-35 checks. A score out of 100. A report saved to `reports/` with exactly what's missing and exactly what to add to fix it.
+43 checks. A score out of 100. A report saved to `reports/` with exactly what's missing and exactly what to add to fix it.
 
 You'll stop losing velocity to the same avoidable gaps on every new project. The checklist is always the same. Now it runs itself.

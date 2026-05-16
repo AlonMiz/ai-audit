@@ -59,7 +59,7 @@ If `package.json` is absent: mark stack as "unknown" and skip T2-06 and T2-16.
 
 ---
 
-## STEP 3 — RUN ALL 35 CHECKS
+## STEP 3 — RUN ALL 43 CHECKS
 
 Work through every check. For each one record: status (✅ / ❌ / ⚠️), points earned (✅ = full points, ⚠️ = 0, ❌ = 0), and a brief evidence note.
 
