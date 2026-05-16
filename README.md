@@ -40,7 +40,7 @@ The basics. Without these, an AI agent has no reliable orientation — and no co
 | T1-10 | Single validation command (`validate`, `ci`, `check`) |
 | T1-11 | Dev workflow skill |
 
-### 🟡 Important — up to 16 checks × 4 pts = up to 64 pts
+### 🟡 Important — up to 18 checks × 4 pts = up to 72 pts
 
 Without these, the AI will make recurring mistakes on conventions and workflow.
 
@@ -57,14 +57,16 @@ Without these, the AI will make recurring mistakes on conventions and workflow.
 | T2-12 | Planning protocol documented |
 | T2-13 | Test strategy documented |
 | T2-14 | Branch finishing protocol documented |
-| T2-15 | Code quality tools configured (knip, depcheck, etc.) |
+| T2-15 | Unused code detection configured (fallow, knip, etc.) |
 | T2-16 | High-impact library skills (React Query, tRPC, Drizzle, etc.) *(conditional: N/A if no package.json)* |
 | T2-17 | Language discipline documented (TypeScript: no `any`, no `as`, strict mode) |
 | T2-18 | Schema validation configured (Zod, Valibot, etc.) |
 | T2-19 | No duplicate content across instruction files *(conditional: applies when 2+ instruction files exist)* |
 | T2-20 | Code collaboration protocol documented (commits, PRs, code review) |
+| T2-21 | Duplication detection configured (fallow, jscpd) |
+| T2-22 | Complexity analysis configured (fallow health, ESLint complexity) |
 
-### 🟢 Advanced — 11 checks × 1 pt = 11 pts
+### 🟢 Advanced — 12 checks × 1 pt = 12 pts
 
 Domain knowledge loaded on demand via skills.
 
@@ -81,6 +83,7 @@ Domain knowledge loaded on demand via skills.
 | T3-09 | Finishing/integration workflow skill |
 | T3-10 | MCP server configured |
 | T3-11 | Eval/drift config |
+| T3-12 | Architecture boundaries configured (fallow boundaries, eslint-plugin-boundaries) *(conditional: N/A if no package.json)* |
 
 ## Maturity levels
 

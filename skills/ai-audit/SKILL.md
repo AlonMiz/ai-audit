@@ -244,9 +244,9 @@ Scoring:
 - ⚠️ 0–1 signals and instruction file exists — recommendation provides a default finishing protocol to add
 - ❌ if no instruction file
 
-**T2-15 — Code quality tools configured** [4 pts]
-Check `package.json` devDependencies for at least one static analysis / dead-code tool:
-- **`fallow`** — covers unused code, duplication, complexity, and architecture drift in one tool; preferred recommendation when nothing is installed
+**T2-15 — Unused code detection configured** [4 pts]
+Check `package.json` devDependencies for at least one unused code / dead-code tool:
+- **`fallow`** — covers unused exports, files, dependencies, types, and circular deps; preferred recommendation
 - **`knip`** — dead code and unused dependencies
 - `depcheck`, `npm-check`, `ts-unused-exports`, `unimported` — narrower unused-dependency tools
 
@@ -254,8 +254,35 @@ Then check `package.json` scripts (or `.fallowrc.json` for fallow) for a script 
 - ✅ if a qualifying tool is in devDependencies AND a script or config runs it
 - ⚠️ if tool is present in devDependencies but no script/config wires it in (or vice-versa)
 - ❌ if neither found
+- Skip (mark N/A, award 0) if `package.json` is absent
 
-For ❌ recommendations: suggest installing `fallow` (`pnpm add -D fallow`) as the first choice — it replaces knip, jscpd, and complexity tools in one package.
+For ❌ recommendations: suggest `fallow` first — `fallow dead-code` covers this check and T2-21 and T2-22 simultaneously.
+
+**T2-21 — Duplication detection configured** [4 pts]
+Check `package.json` devDependencies for a duplication detection tool:
+- **`fallow`** — `fallow dupes` detects exact, AST-level, and semantic clones; preferred recommendation
+- `jscpd` — copy-paste detector
+
+Then check `package.json` scripts (or `.fallowrc.json` for fallow) for a script or config that runs duplication detection.
+- ✅ if a qualifying tool is in devDependencies AND a script or config runs it
+- ⚠️ if tool is present but no script/config wires it in (or vice-versa)
+- ❌ if neither found
+- Skip (mark N/A, award 0) if `package.json` is absent
+
+Note: if `fallow` passed T2-15, it also satisfies this check — do not mark ❌ just because there is no separate `jscpd` install.
+
+**T2-22 — Complexity analysis configured** [4 pts]
+Check `package.json` devDependencies for a complexity analysis tool:
+- **`fallow`** — `fallow health` surfaces high-risk functions, hotspots, and per-file maintainability scores; preferred recommendation
+- ESLint rules `complexity` or `sonarjs/cognitive-complexity` configured in `.eslintrc.*` / `eslint.config.*`
+
+Then check `package.json` scripts (or `.fallowrc.json` for fallow) for a script that runs complexity analysis.
+- ✅ if a qualifying tool or rule is configured AND wired into a script or CI gate
+- ⚠️ if tool/rule is present but not wired in
+- ❌ if neither found
+- Skip (mark N/A, award 0) if `package.json` is absent
+
+Note: if `fallow` passed T2-15, it also satisfies this check.
 
 **T2-16 — High-impact library skills** [4 pts]
 From the detected stack (Step 2), identify any **high-impact libraries** present: React Query, tRPC, Drizzle, Prisma, TypeORM. For each detected library, check whether a skill exists whose frontmatter `name:`, `description:`, or directory name matches the library keyword.
@@ -363,6 +390,15 @@ Look for an MCP server config file (e.g. `.vscode/mcp.json`, `mcp.json`, or simi
 Look for any eval dataset or drift monitoring setup — an `evals/` or `eval/` directory with files, or eval config files. This signals the repo can measure whether instructions stay effective as code evolves.
 - ✅ if found | ❌ if not found
 
+**T3-12 — Architecture boundaries configured** [1 pt]
+Check for explicit architecture boundary enforcement — import rules between layers or modules that prevent drift over time:
+- **`fallow`** with a `boundaries` config in `.fallowrc.json` (preset: `bulletproof`, `layered`, `hexagonal`, `feature-sliced`, or custom zones/rules)
+- **`eslint-plugin-boundaries`** or **`@typescript-eslint/no-restricted-imports`** rules configured in ESLint config
+- Any other tool or config enforcing module-level import restrictions
+
+- ✅ if boundary enforcement is configured | ❌ if not found
+- Skip (mark N/A, award 0) if `package.json` is absent
+
 ---
 
 ## STEP 4 — SCORE AND GRADE
@@ -376,7 +412,7 @@ Tally all points:
 
 **Normalized score:** `round(raw_pts / max_pts × 100)` — always displayed as `/100` regardless of how many checks are in the audit. This means adding new checks in future never breaks the scale.
 
-Max raw pts: 154 when T1-08 and T2-19 both apply (2+ instruction files found), 140 when both are N/A (≤1 file). Subtract 4 more for each of T2-06/T2-16 that is also N/A.
+Max raw pts: 163 when T1-08 and T2-19 both apply (2+ instruction files found), 149 when both are N/A (≤1 file). Subtract 4 more for each of T2-06/T2-15/T2-16/T2-21/T2-22 that is also N/A (no package.json). Subtract 1 more if T3-12 is N/A.
 
 | Level | Name | Threshold |
 |-------|------|-----------|
@@ -460,7 +496,7 @@ DETECTED STACK: <comma-separated list of detected technologies>
    <status> T1-10  Single validation command ............. <evidence>
    <status> T1-11  Dev workflow skill ................... <evidence>
 
-🟡 IMPORTANT  [XX/64 pts]
+🟡 IMPORTANT  [XX/72 pts]
    <status> T2-01  Architecture doc ..................... <evidence>
    <status> T2-02  Tech stack documented ................ <evidence>
    <status> T2-06  Framework skill ...................... <evidence>
@@ -472,14 +508,16 @@ DETECTED STACK: <comma-separated list of detected technologies>
    <status> T2-12  Planning protocol .................... <evidence>
    <status> T2-13  Test strategy ........................ <evidence>
    <status> T2-14  Branch finishing protocol ............. <evidence>
-   <status> T2-15  Code quality tools ................... <evidence>
+   <status> T2-15  Unused code detection ................ <evidence>
    <status> T2-16  High-impact library skills ............ <evidence>
    <status> T2-17  Language discipline ................... <evidence>
    <status> T2-18  Schema validation .................... <evidence>
    <status> T2-19  No duplicate instruction content ...... <N/A if ≤1 file; else list any duplicated categories>
    <status> T2-20  Code collaboration protocol .......... <evidence>
+   <status> T2-21  Duplication detection ................ <evidence>
+   <status> T2-22  Complexity analysis .................. <evidence>
 
-🟢 ADVANCED  [XX/11 pts]
+🟢 ADVANCED  [XX/12 pts]
    <status> T3-01  UI/Design skill ...................... <evidence>
    <status> T3-02  Brainstorming/planning skill .......... <evidence>
    <status> T3-03  Debugging skill ...................... <evidence>
@@ -491,6 +529,7 @@ DETECTED STACK: <comma-separated list of detected technologies>
    <status> T3-09  Finishing/integration workflow ........ <evidence>
    <status> T3-10  MCP server configured ................ <evidence>
    <status> T3-11  Eval/drift config .................... <evidence>
+   <status> T3-12  Architecture boundaries .............. <evidence>
 
 ────────────────────────────────────────────────────────────
 TOP RECOMMENDATIONS (sorted by impact)
@@ -545,7 +584,7 @@ Write a file at `ai-audit-report.md` with this exact structure:
 | T1-10 | Single validation command | ... | ... |
 | T1-11 | Dev workflow skill | ... | ... |
 
-### 🟡 Important [XX/64 pts]
+### 🟡 Important [XX/72 pts]
 
 | ID | Check | Status | Evidence |
 |----|-------|--------|----------|
@@ -560,14 +599,16 @@ Write a file at `ai-audit-report.md` with this exact structure:
 | T2-12 | Planning protocol documented | ... | ... |
 | T2-13 | Test strategy documented | ... | ... |
 | T2-14 | Branch finishing protocol documented | ... | ... |
-| T2-15 | Code quality tools configured | ... | ... |
+| T2-15 | Unused code detection configured | ... | ... |
 | T2-16 | High-impact library skills | ... | ... |
 | T2-17 | Language discipline documented | ... | ... |
 | T2-18 | Schema validation configured | ... | ... |
 | T2-19 | No duplicate instruction content | ✅/⚠️/❌/N/A | <N/A if ≤1 file; else list duplicated categories and files> |
 | T2-20 | Code collaboration protocol documented | ... | ... |
+| T2-21 | Duplication detection configured | ... | ... |
+| T2-22 | Complexity analysis configured | ... | ... |
 
-### 🟢 Advanced [XX/11 pts]
+### 🟢 Advanced [XX/12 pts]
 
 | ID | Check | Status | Evidence |
 |----|-------|--------|----------|
@@ -582,6 +623,7 @@ Write a file at `ai-audit-report.md` with this exact structure:
 | T3-09 | Finishing/integration workflow | ... | ... |
 | T3-10 | MCP server configured | ... | ... |
 | T3-11 | Eval/drift config | ... | ... |
+| T3-12 | Architecture boundaries configured | ... | ... |
 
 ---
 
