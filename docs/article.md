@@ -30,36 +30,42 @@ One thing worth saying upfront: the things that make a repo readable for an agen
 
 ## What "not ready" actually looks like
 
-**Failure mode 1 — The agent guesses the test command.** No instruction file, or an instruction file with no commands. The agent tries `vitest --config vite.config.ts src/`. Fails. Tries `npx vitest run`. Fails differently. Your project uses `pnpm validate`. Three minutes of debugging a missing script that was never missing.
+**Failure mode 1 — The agent commits bad code.** Pre-commit hooks configured, but the agent doesn't know they exist. It commits. The hook rejects it. The agent is confused and tries again with `--no-verify`.
 
-**Failure mode 2 — The agent commits bad code.** Pre-commit hooks configured, but the agent doesn't know they exist. It commits. The hook rejects it. The agent is confused and tries again with `--no-verify`.
-
-**Failure mode 3 — Done means nothing.** No definition of done in the instruction file. The agent calls the task complete the moment the code runs. No test was run. No linter was run. You find the issue in the next session.
+**Failure mode 2 — Done means nothing.** No definition of done in the instruction file. The agent calls the task complete the moment the code runs. No test was run. No linter was run. You find the issue in the next session.
 
 ---
 
-## What the audit actually catches
+## Checks that worth highlighting
 
 43 checks total. Here are four that show up most often in the real reports — with actual audit output.
 
-**Operational guardrails** — Does the agent know how to operate safely? No ad-hoc shell commands, no editing files via terminal, no installing packages mid-task. A passing project has explicit rules like:
+### Operational guardrails
 
-> *"Never inline bash loops in ad-hoc terminal calls — create a reusable script in scripts/"*
+Does the agent know how to operate safely? No ad-hoc shell commands, no editing files via terminal, no installing packages mid-task. A passing project has explicit rules like:
+
+> *"Never inline bash loops in ad-hoc terminal calls — create a reusable script in scripts/ and add it to package.json/scripts"*
 > *"NEVER git push without explicit permission"*
 
 Without this, the agent runs whatever it decides makes sense. `sed -i` a file instead of using the editor. Chain 5 piped commands. Install a package mid-task. Each is a failure you won't notice until it's already cost you.
 
-**Code quality over time** — AI writes fast and doesn't track what it's already written. Without automated gates: dead exports, duplicated logic across three files, functions complex enough to be unmaintainable. We recommend [`fallow`](https://github.com/nicolo-ribaudo/fallow) — written in Rust, runs in milliseconds, and covers dead code detection, duplication, and complexity analysis in a single install instead of three separate tools:
+### Code quality over time
+
+AI writes fast and doesn't track what it's already written. Without automated gates: dead exports, duplicated logic across three files, functions complex enough to be unmaintainable. We recommend [`fallow`](https://github.com/nicolo-ribaudo/fallow) — written in Rust, runs in milliseconds, and covers dead code detection, duplication, and complexity analysis in a single install instead of three separate tools:
 
 > *`"validate": "npm run type-check && npm run lint && fallow dead-code && fallow dupes && fallow health"`*
 
 The check has to run automatically on every commit, not on request. That's the whole point.
 
-**TDD** *(informational — doesn't affect your score, but flagged because the AI era changed the calculus)* — The old excuse for skipping tests was time. Writing tests was slow. With AI, that excuse is gone. Tests are fast to write now, and the velocity only goes up. What remains is the discipline problem: without red-green-refactor, the agent writes code, then writes a test that passes against that code, and calls it done. You have coverage. You have nothing. The test only proves the code runs — not that it solves the problem you stated. That's what red-green-refactor prevents: it forces a failing test first, so you know what you're actually verifying.
+### TDD
+
+The old excuse for skipping tests was time. Writing tests was slow. With AI, that excuse is gone. Tests are fast to write now, and the velocity only goes up. What remains is the discipline problem: without red-green-refactor, the agent writes code, then writes a test that passes against that code, and calls it done. You have coverage. You have nothing. The test only proves the code runs — not that it solves the problem you stated. That's what red-green-refactor prevents: it forces a failing test first, so you know what you're actually verifying.
 
 > *"NEVER just change the test to match the current implementation"*
 
-**Instruction file quality** — The check most projects miss. The file exists, has content, passes all the other checks — and still doesn't work. Anthropic's own [CLAUDE.md documentation](https://docs.anthropic.com/en/docs/claude-code/memory) is direct: *"target under 200 lines per CLAUDE.md file. Longer files consume more context and reduce adherence."* Four signals: ≤ 200 lines, structured with headers, concrete commands and paths, no filler. A real partial fail:
+### Instruction file quality
+
+The check most projects miss. The file exists, has content, passes all the other checks — and still doesn't work. Anthropic's own [CLAUDE.md documentation](https://docs.anthropic.com/en/docs/claude-code/memory) is direct: *"target under 200 lines per CLAUDE.md file. Longer files consume more context and reduce adherence."* Four signals: ≤ 200 lines, structured with headers, concrete commands and paths, no filler. A real partial fail:
 
 > *T2-23 — ⚠️ 3 of 4 signals missing: file is 340 lines, no section headers, contains "write good tests" without a concrete test strategy attached*
 
