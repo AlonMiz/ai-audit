@@ -287,6 +287,18 @@ Then check `package.json` scripts (or `.fallowrc.json` for fallow) for a script 
 
 Note: if `fallow` passed T2-15, it also satisfies this check.
 
+**T2-23 — Instruction file quality** [4 pts]
+Read the instruction file. Evaluate whether it will actually be followed, using 4 signals from Anthropic's documented best practices for CLAUDE.md quality:
+1. **Length ≤ 200 lines** — files over 200 lines cause adherence degradation (count non-blank lines)
+2. **Structured with headers** — uses markdown `##` or `###` to organize sections (not a single prose wall or flat bullet list with no headings)
+3. **Concrete commands/paths** — at least 3 instructions reference a specific runnable command, tool name, or file path (e.g. `pnpm test`, `src/api/`, `lefthook`) rather than vague directives
+4. **No self-evident filler** — does NOT contain untethered phrases like "write clean code", "follow best practices", "keep code organized", or "write good tests" without a concrete spec attached
+
+Scoring:
+- ✅ 3 or more of 4 signals present
+- ⚠️ 1–2 signals present and instruction file exists — list which signals are missing and what to fix
+- ❌ if no instruction file
+
 **T2-16 — High-impact library skills** [4 pts]
 From the detected stack (Step 2), identify any **high-impact libraries** present: React Query, tRPC, Drizzle, Prisma, TypeORM. For each detected library, check whether a skill exists whose frontmatter `name:`, `description:`, or directory name matches the library keyword.
 - ✅ if every detected high-impact library has a matching skill (or none are detected)
@@ -415,7 +427,7 @@ Tally all points:
 
 **Normalized score:** `round(raw_pts / max_pts × 100)` — always displayed as `/100` regardless of how many checks are in the audit. This means adding new checks in future never breaks the scale.
 
-Max raw pts: 163 when T1-08 and T2-19 both apply (2+ instruction files found), 149 when both are N/A (≤1 file). Subtract 4 more for each of T2-06/T2-15/T2-16/T2-21/T2-22 that is also N/A (no package.json). Subtract 1 more if T3-12 is N/A.
+Max raw pts: 167 when T1-08 and T2-19 both apply (2+ instruction files found), 153 when both are N/A (≤1 file). Subtract 4 more for each of T2-06/T2-15/T2-16/T2-21/T2-22 that is also N/A (no package.json). Subtract 1 more if T3-12 is N/A.
 
 | Level | Name | Threshold |
 |-------|------|-----------|
@@ -499,7 +511,7 @@ DETECTED STACK: <comma-separated list of detected technologies>
    <status> T1-10  Single validation command ............. <evidence>
    <status> T1-11  Dev workflow skill ................... <evidence>
 
-🟡 IMPORTANT  [XX/72 pts]
+🟡 IMPORTANT  [XX/76 pts]
    <status> T2-01  Architecture doc ..................... <evidence>
    <status> T2-02  Tech stack documented ................ <evidence>
    <status> T2-06  Framework skill ...................... <evidence>
@@ -519,6 +531,7 @@ DETECTED STACK: <comma-separated list of detected technologies>
    <status> T2-20  Code collaboration protocol .......... <evidence>
    <status> T2-21  Duplication detection ................ <evidence>
    <status> T2-22  Complexity analysis .................. <evidence>
+   <status> T2-23  Instruction file quality ............. <evidence>
 
 🟢 ADVANCED  [XX/12 pts]
    <status> T3-01  UI/Design skill ...................... <evidence>
@@ -592,7 +605,7 @@ Write the file at the resolved path with this exact structure:
 | T1-10 | Single validation command | ... | ... |
 | T1-11 | Dev workflow skill | ... | ... |
 
-### 🟡 Important [XX/72 pts]
+### 🟡 Important [XX/76 pts]
 
 | ID | Check | Status | Evidence |
 |----|-------|--------|----------|
@@ -615,6 +628,7 @@ Write the file at the resolved path with this exact structure:
 | T2-20 | Code collaboration protocol documented | ... | ... |
 | T2-21 | Duplication detection configured | ... | ... |
 | T2-22 | Complexity analysis configured | ... | ... |
+| T2-23 | Instruction file quality | ... | ... |
 
 ### 🟢 Advanced [XX/12 pts]
 

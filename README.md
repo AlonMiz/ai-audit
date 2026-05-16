@@ -40,7 +40,7 @@ The basics. Without these, an AI agent has no reliable orientation — and no co
 | T1-10 | Single validation command (`validate`, `ci`, `check`) |
 | T1-11 | Dev workflow skill |
 
-### 🟡 Important — up to 18 checks × 4 pts = up to 72 pts
+### 🟡 Important — up to 19 checks × 4 pts = up to 76 pts
 
 Without these, the AI will make recurring mistakes on conventions and workflow.
 
@@ -65,6 +65,7 @@ Without these, the AI will make recurring mistakes on conventions and workflow.
 | T2-20 | Code collaboration protocol documented (commits, PRs, code review) |
 | T2-21 | Duplication detection configured (fallow, jscpd) |
 | T2-22 | Complexity analysis configured (fallow health, ESLint complexity) |
+| T2-23 | Instruction file quality (≤200 lines, headers, concrete commands, no filler) |
 
 ### 🟢 Advanced — 12 checks × 1 pt = 12 pts
 
