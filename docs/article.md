@@ -79,13 +79,13 @@ Each check catches a specific failure mode. Together, they produce a single numb
 
 The audit scores your repo out of 100 and places it on one of five levels:
 
-| Level | Name | Score |
-|-------|------|-------|
-| 1 | Functional | < 35% |
-| 2 | Documented | 35–54% |
-| 3 | Standardized | 55–74% |
-| 4 | Optimized | 75–89% |
-| 5 | Autonomous | ≥ 90% |
+| Level | Name         | Score  |
+| ----- | ------------ | ------ |
+| 1     | Functional   | < 35%  |
+| 2     | Documented   | 35–54% |
+| 3     | Standardized | 55–74% |
+| 4     | Optimized    | 75–89% |
+| 5     | Autonomous   | ≥ 90%  |
 
 Level 4 (the real audit report referenced above scored 84%) means the agent can work with high velocity and low supervision. Level 5 means it can orient itself, plan, execute, verify, and finish without you holding it.
 
